@@ -77,4 +77,3 @@ All 50 wave definitions and the final phase transition are tested, but a complet
 - `tools/browser-test.mjs`: Chromium mouse/touch and viewport smoke tests.
 
 To run browser tests, provide `PLAYWRIGHT_PATH` (installed Playwright package path) and `CHROME_PATH` (Chrome executable path), start the local server, then run `node tools/browser-test.mjs`. The script's defaults match the development workstation. Test hooks are available only on localhost with `?test`; they are absent on public hosts.
-
