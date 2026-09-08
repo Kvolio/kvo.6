@@ -7,7 +7,7 @@ let storage;try{storage=window.localStorage;}catch{storage={getItem:()=>null,set
 const saves=new SaveManager(storage),audio=new AudioManager();try{audio.enabled=storage.getItem('tidehold.sound')==='true';}catch{}
 let game=new Game(),renderer=new Renderer(document.getElementById('game'),game),ui,started=false;
 const input=new Input(renderer,()=>ui?.selection());
-function setGame(next,difficulty='normal'){started=true;game=next||new Game(Date.now(),difficulty);renderer.game=game;renderer.terrain=null;renderer.preview=null;renderer.center();input.commandMode=null;input.keys.clear();ui=new UI(game,renderer,input,saves,audio,setGame);ui.update();}
+function setGame(next,difficulty='normal'){started=true;game=next||new Game(Date.now(),difficulty);renderer.game=game;renderer.terrain=null;renderer.occupiedRevision=null;renderer.preview=null;renderer.center();input.commandMode=null;input.pointers.clear();input.start=null;input.gesture=false;input.mode='select';input.keys.clear();ui=new UI(game,renderer,input,saves,audio,setGame,()=>{started=false;});ui.update();}
 setGame(game);started=false;ui.welcome();
 new ResizeObserver(()=>renderer.resize()).observe(document.getElementById('viewport'));
 let previous=performance.now(),uiClock=0;

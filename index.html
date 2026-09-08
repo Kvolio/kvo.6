@@ -2,31 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#172d29"><meta name="description" content="Build a kingdom from a lonely keep. Defend the coast against fifty invasions in Tidehold, a browser strategy game for touch and desktop.">
-  <title>Tidehold — The Last Coast</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23172d29'/%3E%3Cpath d='M14 50V20h8v8h6V14h8v14h6v-8h8v30H14' fill='%23dac18b'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#1e302a"><meta name="description" content="Build an overhead medieval kingdom, mine mountain foothills, and defend your coast in Tidehold.">
+  <title>Tidehold — The Last Coast</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e302a'/%3E%3Cpath d='M14 50V20h8v8h6V14h8v14h6v-8h8v30H14' fill='%23dac18b'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header><a class="brand" href="#" aria-label="Tidehold home"><span class="crest">♜</span><span>TIDEHOLD<small>THE LAST COAST</small></span></a><div id="resources" aria-label="Kingdom resources"></div><button id="menu" aria-label="Open game menu">☰</button></header>
-  <main>
-    <section id="viewport" aria-label="Kingdom battlefield">
-      <canvas id="game" tabindex="0" aria-label="Kingdom map. Use WASD to pan, mouse wheel to zoom, click to select. Touch: drag to pan, pinch to zoom, tap to select."></canvas>
-      <div class="wave-card"><span class="eyebrow">THE NORTHERN REACH</span><div><strong id="wave">A new kingdom</strong><span id="timer">03:00</span></div><p id="wave-state">The sea is quiet. For now.</p><button id="next-wave">Call next wave <span>→</span></button></div>
-      <div id="boss" hidden></div>
-      <div class="map-label">NORTH SEA <span>≈</span></div>
-      <div id="toast" role="status" aria-live="polite"></div>
-      <div id="placement" hidden><span id="placement-label"></span><button id="confirm-build">Place here</button><button id="cancel-build" aria-label="Cancel building">✕</button></div>
-      <div class="camera-controls"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="home" aria-label="Center on Keep">⌂</button></div>
-      <div class="world-footer"><span id="hint">WASD to explore · Scroll to zoom · Click to select</span><div><button id="pause" aria-label="Pause game">Ⅱ</button><button id="speed" aria-label="Change game speed">1×</button></div></div>
-      <canvas id="minimap" width="168" height="112" aria-label="Kingdom overview"></canvas>
-    </section>
-    <aside id="sidebar"><div class="panel-heading"><div><span class="eyebrow">YOUR KINGDOM</span><h1>From humble beginnings.</h1></div><span class="seal">I</span></div>
-      <div id="objective"><span class="objective-icon">✧</span><div><strong>A foothold on the coast</strong><p>Build a Lumber Camp, assign workers, then raise a Farm to feed your people.</p></div></div>
-      <nav id="tabs" aria-label="Command panels"><button class="active" data-tab="build">Build</button><button data-tab="army">Army</button><button data-tab="inspect">Inspect</button></nav>
-      <div id="panel"></div>
-      <div class="sidebar-foot"><span class="live-dot"></span><span id="status">A kingdom is yours to make.</span><button id="help" aria-label="How to play">?</button></div>
-    </aside>
+  <header id="hud"><button class="brand" id="brand" aria-label="Open pause menu"><span class="crest">♜</span><span>TIDEHOLD<small>THE LAST COAST</small></span></button><div id="resources" aria-label="Kingdom resources"></div><button id="menu" aria-label="Open game menu">☰</button></header>
+  <main id="viewport" aria-label="Kingdom battlefield">
+    <canvas id="game" tabindex="0" aria-label="Overhead kingdom map. WASD to pan, wheel to zoom, click to select. Touch: drag to pan, pinch to zoom, tap to select."></canvas>
+    <section class="wave-card"><span class="eyebrow">THE NORTHERN REACH</span><div class="wave-row"><strong id="wave">A new kingdom</strong><span id="timer">03:00</span></div><p id="wave-state">The sea is quiet. For now.</p><button id="next-wave">Call next wave <span>→</span></button><div id="objective">Build a Lumber Camp and a Farm.</div></section>
+    <section id="boss" hidden aria-label="Boss health"></section>
+    <div id="map-overview"><canvas id="minimap" width="200" height="140" aria-label="Kingdom overview"></canvas><span>YOUR DOMAIN</span></div>
+    <div class="camera-controls"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="home" aria-label="Center on Keep">⌂</button></div>
+    <div id="hint">WASD to explore · Scroll to zoom · Click to select</div>
+    <section id="tray" hidden aria-label="Command tray"><div class="tray-heading"><span id="tray-title">Build your kingdom</span><button id="close-tray" aria-label="Close command tray">✕</button></div><div id="panel"></div></section>
+    <section id="inspector" hidden aria-label="Selection details"><div class="tray-heading"><span class="eyebrow">SELECTION</span><button id="close-inspector" aria-label="Close selection details">✕</button></div><div id="inspection"></div></section>
+    <section id="placement" hidden aria-label="Building placement"><img id="placement-image" alt=""><div><strong id="placement-label"></strong><span id="placement-cost"></span><small id="placement-reason"></small></div><button id="confirm-build" class="primary">Place here</button><button id="cancel-build" aria-label="Cancel building">✕</button></section>
+    <div id="toast" role="status" aria-live="polite"></div>
   </main>
-  <dialog id="modal"><div id="modal-body"></div></dialog>
+  <footer id="command-dock"><nav id="tabs" aria-label="Kingdom commands"><button data-tab="build"><span>⌂</span> Build</button><button data-tab="army"><span>⚔</span> Army</button><button data-tab="inspect"><span>◎</span> Inspect</button></nav><span id="status">Five workers. One beginning.</span><div class="dock-tools"><button id="overview" aria-label="Toggle overview map">▧</button><button id="help" aria-label="How to play">?</button><button id="pause" aria-label="Pause game">Ⅱ</button><button id="speed" aria-label="Change game speed">1×</button></div></footer>
+  <dialog id="modal" aria-label="Game menu"><div id="modal-body"></div></dialog>
   <script type="module" src="src/main.js"></script>
 </body></html>

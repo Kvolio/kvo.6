@@ -1,6 +1,6 @@
 # Tidehold — The Last Coast
 
-A dependency-free HTML5 kingdom survival game for **desktop and touch screens**, built for [Kvolio/kvo.6](https://github.com/Kvolio/kvo.6).
+A dependency-free HTML5 kingdom survival game for **desktop and touch screens**, built for [Kvolio/kvo.6](https://github.com/Kvolio/kvo.6). Now features true overhead roof artwork, a map-first HUD, and ore-rich mountain ranges.
 
 Start with one Keep, five workers, and a small resource reserve. Build an economy, recruit defenders, fortify your coast, and survive a 50-wave campaign. The project is a playable first implementation of the design brief, not a finished commercial release.
 
@@ -45,6 +45,18 @@ Touch camera gestures do not place buildings or issue orders. The layout support
 4. Fortify approaches with walls and leave gates for friendly units. Enemies route around obstacles or attack a blocking structure when enclosed.
 5. Upgrade the Keep for iron/gold mines, advanced troops, and ballista towers. Blacksmith research improves weapons and armor.
 
+## Mountains and the new interface
+
+New kingdoms generate two or three connected mountain ranges. Peaks block construction and ground movement; two-tile passes and traversable foothills preserve routes to the coast. Flying enemies can cross peaks. The starting eight-tile area stays clear of mountains, with guaranteed nearby wood and stone.
+
+Foothill tiles roll a 20% stone, 8% iron, and 4% gold deposit chance. Mineral deposits there hold **2,100 resources**, compared with **1,400** in the lowlands. Select a deposit to see its remaining reserve. Mines and workers require reachable deposits within the existing eight-tile collection radius. Blocked or exhausted mines report their status; workers carry partial loads back when a vein runs out.
+
+Existing saves load their original maps unchanged and receive the new graphics and interface. **Start a new kingdom to get mountain ranges.**
+
+The title screen offers Continue, New Kingdom, Settings, and How to Play. Build and Army open trays from the bottom dock; selecting buildings, units, or deposits opens their inspector. Choosing a building closes the tray for placement. The pause menu saves before returning to the title and keeps the current kingdom open if saving fails. Nested menus preserve your previous pause state.
+
+See [redesign validation and screenshots](docs/REDESIGN.md).
+
 Buildings do not generate resources without workers. Workers gather, carry resources, and drop them at the Keep or a Warehouse. Food is consumed slowly by the population; at zero food, friendly movement slows. Pause remains available while planning and building.
 
 ## Implemented
@@ -68,12 +80,15 @@ All 50 wave definitions and the final phase transition are tested, but a complet
 - `src/data.js`: building, unit, enemy, and wave definitions.
 - `src/world.js`: seeded grid, placement validation, routing.
 - `src/game.js`: economy, construction, units, combat, waves, progression.
-- `src/renderer.js`: procedural artwork, camera, map and minimap rendering.
+- `src/art.js`: cached overhead building artwork shared by the map and menu thumbnails.
+- `src/renderer.js`: textured terrain, mountains, camera, map and minimap rendering.
 - `src/input.js`: pointer gestures, selection, commands, keyboard controls.
 - `src/ui.js`: responsive command panels and dialogs.
 - `src/save.js`: save, audio and platform adapters.
 - `src/main.js`: lifecycle and browser integration.
 - `tests/game.test.mjs`: deterministic simulation regression tests.
+- `tests/mountains.test.mjs`: 100-seed generation, movement, mining and save compatibility checks.
 - `tools/browser-test.mjs`: Chromium mouse/touch and viewport smoke tests.
+- `tools/design-test.mjs`: menu state, save failures, deposit inspection, orientation checks and deterministic visual fixtures.
 
 To run browser tests, provide `PLAYWRIGHT_PATH` (installed Playwright package path) and `CHROME_PATH` (Chrome executable path), start the local server, then run `node tools/browser-test.mjs`. The script's defaults match the development workstation. Test hooks are available only on localhost with `?test`; they are absent on public hosts.
