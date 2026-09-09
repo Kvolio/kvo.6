@@ -1,8 +1,8 @@
 # Tidehold — The Last Coast
 
-A dependency-free HTML5 kingdom survival game for **desktop and touch screens**, built for [Kvolio/kvo.6](https://github.com/Kvolio/kvo.6). Now features true overhead roof artwork, a map-first HUD, and ore-rich mountain ranges.
+A dependency-free HTML5 kingdom survival game for **desktop and touch screens**, built for [Kvolio/kvo.6](https://github.com/Kvolio/kvo.6). Features illustrated overhead roofs, a map-first HUD, ore-rich mountains, larger islands, timed progression, and a 60-wave Nightmare campaign.
 
-Start with one Keep, five workers, and a small resource reserve. Build an economy, recruit defenders, fortify your coast, and survive a 50-wave campaign. The project is a playable first implementation of the design brief, not a finished commercial release.
+Start with one Keep, five workers, and a small resource reserve. Build an economy, recruit defenders, fortify your coast, and survive 50 waves, or 60 on Nightmare. The project is a playable first implementation of the design brief, not a finished commercial release.
 
 ## Play locally
 
@@ -32,6 +32,9 @@ The build produces **`dist/index.html`**, a self-contained game with inline code
 | Move | Select units, right click a destination | Inspect → Move, then tap a destination |
 | Attack move / patrol | Select units, choose order, click destination | Select units, choose order, tap destination |
 | Build | Choose a building, click valid land | Choose a building, tap a site, then **Place here** |
+| Rotate / upgrade | R rotates placement; E upgrades selection | Rotate or Upgrade buttons |
+| Walls and roads | Drag to draw connected runs | Drag a preview, then confirm |
+| Mount walls | Select archers/crossbows, right-click a completed wall | Inspector → Mount wall, then tap the wall |
 | Cancel building | Escape, right click, or ✕ | ✕ |
 | Pause / speed | Space or on-screen buttons | On-screen buttons |
 
@@ -51,11 +54,11 @@ New kingdoms generate two or three connected mountain ranges. Peaks block constr
 
 Foothill tiles roll a 20% stone, 8% iron, and 4% gold deposit chance. Mineral deposits there hold **2,100 resources**, compared with **1,400** in the lowlands. Select a deposit to see its remaining reserve. Mines and workers require reachable deposits within the existing eight-tile collection radius. Blocked or exhausted mines report their status; workers carry partial loads back when a vein runs out.
 
-Existing saves load their original maps unchanged and receive the new graphics and interface. **Start a new kingdom to get mountain ranges.**
+Existing saves load their original maps unchanged and receive the new graphics and interface. **Start a new kingdom for the new terrain.** Easy and Normal retain a northern coast; Hard and Nightmare use larger islands surrounded by ocean.
 
 The title screen offers Continue, New Kingdom, Settings, and How to Play. Build and Army open trays from the bottom dock; selecting buildings, units, or deposits opens their inspector. Choosing a building closes the tray for placement. The pause menu saves before returning to the title and keeps the current kingdom open if saving fails. Nested menus preserve your previous pause state.
 
-See [redesign validation and screenshots](docs/REDESIGN.md).
+See [Nightmare, upgrades and screenshots](docs/NIGHTMARE.md), [implementation coverage](docs/OVERHAUL-STATUS.md), and [playtest scope](docs/PLAYTEST.md).
 
 Buildings do not generate resources without workers. Workers gather, carry resources, and drop them at the Keep or a Warehouse. Food is consumed slowly by the population; at zero food, friendly movement slows. Pause remains available while planning and building.
 
@@ -64,27 +67,32 @@ Buildings do not generate resources without workers. Workers gather, carry resou
 - Seeded coastal terrain and resource deposits; no starting village.
 - Grid placement, validity previews, construction, worker assignment, capacity, food upkeep, storage, repair, demolition refunds, and upgrades.
 - Six recruitable unit types, selection/group orders, hold/defend/attack move/patrol, gates, roads, towers, and grid pathfinding.
-- Ship arrivals, varied enemy compositions, multiple landing areas, 50 waves, ten boss milestones, dragon → Conqueror phase transition, victory/defeat, and endless continuation.
-- Normal/easy/hard settings, pause and 2× speed, optional synthesized cues, local saves, autosaves, and sound preference persistence.
+- Visible ship crews, multiple coasts, mixed enemy roles, stronger bosses, direct flying arrivals, wall garrisons, and optional five-second auto waves.
+- 50-wave core campaign; Nightmare adds demon portals, 12 regular demon classes, the ArchDemon, the two-phase Demon Lord and extra abilities at every earlier milestone. Endless continuation repeats demon bosses.
+- Worker-built timed upgrades, persistent/drag construction, timed training and a three-branch technology tree. Five illustrated building levels and three named Keep designs.
+- Easy/Normal/Hard/Nightmare, pause and 2× speed, original procedural music, atmosphere and combat effects, three audio sliders, local saves and autosaves. Audio starts after interaction and can be muted in Settings.
 - Responsive touch controls, capped rendering resolution, visible-region rendering, a minimap, and one-file packaging.
 - Provider-neutral platform interface. Ad/cloud/score adapters report unavailable until an actual platform integration is supplied.
 
-## Scope and remaining work
+## Scope
 
-The broad design brief is preserved in `docs/DESIGN-BRIEF.md`. This release uses original procedural canvas artwork and simplified boss abilities. It does **not** yet implement the full proposed soundtrack, every suggested troop/building, formation tactics, experience ranks, random events, elaborate destruction cinematics, cloud saves, or advertising.
+The broad original brief is preserved in docs/DESIGN-BRIEF.md and the requested overhaul in docs/OVERHAUL-OBJECTIVE.md. This game uses original local Canvas and Web Audio artwork. Optional ideas from the original brief, such as additional troop classes, experience ranks, random events, cinematics, cloud saves and advertising, are not claimed as implemented.
 
-All 50 wave definitions and the final phase transition are tested, but a complete human-played 50-wave balance pass remains necessary. Real iOS Safari and Android hardware testing and endgame performance certification remain release gates. Browser touch emulation does not substitute for physical-device validation.
+77 simulation tests, six organic openings, established boss encounters, offline audio renders and desktop/touch browser suites support this update. Browser emulation and CPU throttling do not certify physical iOS/Android hardware. Automated balance probes also do not replace long-term player feedback.
 
 ## Source layout
 
 - `src/data.js`: building, unit, enemy, and wave definitions.
 - `src/world.js`: seeded grid, placement validation, routing.
-- `src/game.js`: economy, construction, units, combat, waves, progression.
-- `src/art.js`: cached overhead building artwork shared by the map and menu thumbnails.
+- `src/game.js`: economy, simulation lifecycle and save compatibility.
+- `src/construction.js`, `src/progression.js`: worker tasks, upgrades, training and research.
+- `src/invasions.js`, `src/nightmare.js`, `src/combat.js`, `src/garrison.js`: fleets, demons, abilities, targeting and walls.
+- `src/art.js`, `src/building-upgrades.js`, `src/unit-art.js`: cached overhead artwork and progression.
 - `src/renderer.js`: textured terrain, mountains, camera, map and minimap rendering.
 - `src/input.js`: pointer gestures, selection, commands, keyboard controls.
 - `src/ui.js`: responsive command panels and dialogs.
-- `src/save.js`: save, audio and platform adapters.
+- `src/save.js`: save and platform adapters.
+- `src/audio.js`: original score, synthesized effects and persistent mixing controls.
 - `src/main.js`: lifecycle and browser integration.
 - `tests/game.test.mjs`: deterministic simulation regression tests.
 - `tests/mountains.test.mjs`: 100-seed generation, movement, mining and save compatibility checks.

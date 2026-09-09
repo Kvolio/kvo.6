@@ -4,14 +4,14 @@ The redesign uses local Canvas artwork and cached building textures. Roofs, cour
 
 ## Validation
 
-- **22 simulation tests**, including generation checks over **100 fixed seeds**.
+- **77 simulation tests**, including generation checks over **100 fixed seeds**.
 - Every tested seed preserves the starting area, connected landing routes, accessible deposits, and greater mineral density in the foothills.
 - Mountain collision, enemy breach behavior, flying movement, blocked mines, ore depletion, partial-load delivery, recruitment exits, and legacy map saves are covered.
 - Chromium browser checks cover 1440×900 desktop, 1024×768 tablet, 390×844 portrait, 320×568 small portrait, and 844×390 landscape with mouse or emulated touch.
 - Nested menus preserve both running and paused states. Tests verify saving before the title screen, storage-failure behavior, deposit inspection, locked-action explanations, build cancellation, and orientation changes.
 - The release check exercises group commands, keyboard pause, save preservation, wave state, and opening the single HTML file while offline.
 
-These are browser emulation checks; physical iOS/Android certification and a full human-played campaign balance pass remain outside this update.
+These are browser emulation checks; physical iOS/Android certification and a full human-played campaign balance pass are not established by these checks. See [the expanded playtests](PLAYTEST.md) and [Nightmare update](NIGHTMARE.md).
 
 ## Screenshots
 

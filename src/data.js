@@ -49,9 +49,41 @@ export const ENEMIES = {
  conqueror:{name:'The Conqueror · Phase II',hp:5000,damage:65,range:50,speed:48,armor:14,boss:true,ability:'rally'}
 };
 export const BOSSES = {5:'captain',10:'chief',15:'brute',20:'champion',25:'giant',30:'titan',35:'blackknight',40:'warlord',45:'dragonknight',50:'dragon'};
-export function waveComposition(wave) {
- const pool=['raider']; if(wave>=4)pool.push('barbarian','bow');if(wave>=12)pool.push('berserker','ogre');if(wave>=22)pool.push('ram','elite');
- const units=Array.from({length:Math.min(160,3+wave*2)},(_,i)=>pool[(i*7+wave)%pool.length]);
+// Threat comes from complementary roles, area attacks and armor as well as HP.
+for(const d of Object.values(ENEMIES)){
+ if(d.boss){d.hp=Math.round(d.hp*1.65);d.damage=Math.round(d.damage*1.3);d.defense=.12;d.abilityInterval=8;}
+ else if(d.name!=='Raider'){d.hp=Math.round(d.hp*1.2);d.damage=Math.round(d.damage*1.15);}
+}
+ENEMIES.bow.range=200;ENEMIES.berserker.attackInterval=.7;ENEMIES.elite.defense=.15;
+export const DEMONS={
+ skeleton:{name:'Skeleton',hp:75,damage:13,range:30,speed:86,armor:0,attackInterval:.8},
+ demonwarrior:{name:'Demon Warrior',hp:380,damage:34,range:36,speed:53,armor:6},
+ hellhound:{name:'Hellhound',hp:210,damage:30,range:32,speed:135,armor:2,attackInterval:.7,hunt:'ranged'},
+ infernalarcher:{name:'Infernal Archer',hp:270,damage:30,range:240,speed:58,armor:2,flying:true,burn:6},
+ dreadguard:{name:'Dreadguard',hp:1900,damage:30,range:40,speed:28,armor:12,defense:.25,taunt:true},
+ demonbrute:{name:'Demon Brute',hp:3600,damage:115,range:65,speed:25,armor:8,defense:.35,siege:true,hunt:'walls',thorns:true,scale:3},
+ hellrunner:{name:'Hellrunner',hp:300,damage:48,range:32,speed:150,armor:2,leap:true,hunt:'keep',attackInterval:.8},
+ succubus:{name:'Succubus',hp:520,damage:22,range:210,speed:58,armor:3,aura:.25},
+ infernalmage:{name:'Infernal Mage',hp:720,damage:42,range:235,speed:42,armor:4,splash:75,ability:'summon',abilityInterval:14},
+ wingeddemon:{name:'Winged Demon',hp:580,damage:45,range:40,speed:90,armor:4,flying:true,hunt:'rear'},
+ demonknight:{name:'Demon Knight',hp:1100,damage:57,range:42,speed:113,armor:12,defense:.12,charge:true,scale:1.5},
+ hellfiregolem:{name:'Hellfire Golem',hp:9500,damage:150,range:85,speed:20,armor:10,defense:.4,siege:true,hunt:'walls',wallbreaker:true,splash:95,scale:3.8},
+ archdemon:{name:'The ArchDemon',hp:18000,damage:155,range:115,speed:48,armor:10,defense:.5,boss:true,flying:true,splash:130,ability:'archdemon',abilityInterval:8,scale:4},
+ demonlord:{name:'The Demon Lord',hp:32000,damage:190,range:105,speed:34,armor:14,defense:.6,boss:true,splash:125,aura:.3,ability:'demonlord',abilityInterval:9,scale:4.8}
+};
+for(const [type,d]of Object.entries(DEMONS))ENEMIES[type]={...d,demon:true};
+export function nightmareComposition(wave){
+ const step=wave-50,pool=['skeleton','skeleton','demonwarrior','demonwarrior','hellhound','infernalarcher'];
+ if(step>=2)pool.push('dreadguard','succubus');if(step>=3)pool.push('demonbrute','hellrunner');
+ if(step>=4)pool.push('infernalmage','wingeddemon');if(step>=6)pool.push('demonknight');if(step>=8)pool.push('hellfiregolem');
+ const result=Array.from({length:Math.min(220,36+step*7)},(_,i)=>pool[(i+step)%pool.length]);
+ if(wave>=55&&wave%10===5)result.push('archdemon');if(wave>=60&&wave%10===0)result.push('demonlord');return result;
+}
+export function waveComposition(wave,difficulty='normal') {
+ if(difficulty==='nightmare'&&wave>50&&wave<=60)return nightmareComposition(wave);
+ const pool=wave<4?['raider']:wave<12?['raider','barbarian','bow','raider','bow']:wave<22?['barbarian','bow','berserker','ogre','bow','raider']:['elite','bow','berserker','ram','elite','ogre','bow','barbarian'];
+ const factor=difficulty==='easy'?.8:difficulty==='hard'?1.2:difficulty==='nightmare'?1.35:1;
+ const units=Array.from({length:Math.max(5,Math.round(Math.min(180,4+wave*2.5)*factor))},(_,i)=>pool[(i+wave)%pool.length]);
  if(BOSSES[wave])units.push(BOSSES[wave]);else if(wave>50&&wave%10===0)units.push('warlord');
  return units;
 }

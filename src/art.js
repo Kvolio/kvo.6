@@ -1,3 +1,4 @@
+import {paintBuildingUpgrades} from './building-upgrades.js';
 import {BUILDINGS,TILE} from './data.js';
 import {random} from './world.js';
 
@@ -36,8 +37,68 @@ export class Art {
   }
   fence(c,x,y,w,h){c.strokeStyle='#b8a177';c.lineWidth=2;c.strokeRect(x,y,w,h);for(let xx=x;xx<=x+w;xx+=10){this.circle(c,xx,y,1.8,'#ddd1a6');this.circle(c,xx,y+h,1.8,'#ddd1a6');}for(let yy=y;yy<=y+h;yy+=10){this.circle(c,x,yy,1.8,'#ddd1a6');this.circle(c,x+w,yy,1.8,'#ddd1a6');}}
   towerTop(c,x,y,s,roof=true){this.stone(c,x,y,s,s);c.fillStyle='#5c6960';c.fillRect(x+3,y+3,s-6,s-6);if(roof)this.roof(c,x+4,y+4,s-8,s-8,'slate');for(let i=0;i<s;i+=7){c.fillStyle='#e0dac0';c.fillRect(x+i,y,4,3);c.fillRect(x+i,y+s-3,4,3);c.fillRect(x,y+i,3,4);c.fillRect(x+s-3,y+i,3,4);}}
-  building(type,level=1){
-    const key=`${type}:${level}`;if(this.cache.has(key))return this.cache.get(key);
+  infrastructure(type,level,mask){
+    const key=`network:${type}:${level}:${mask}`;if(this.cache.has(key))return this.cache.get(key);
+    const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;const c=canvas.getContext('2d');c.scale(2,2);c.translate(12,12);
+    const arms=[[20,0,1],[40,20,2],[20,40,4],[0,20,8]].filter(a=>mask&a[2]);
+    const path=()=>{c.beginPath();for(const [x,y]of arms){c.moveTo(20,20);c.lineTo(x,y);}};
+    c.lineCap='butt';c.lineJoin='round';
+    if(type==='road'){
+      path();c.strokeStyle='#82765555';c.lineWidth=28;c.stroke();path();c.strokeStyle='#a89672';c.lineWidth=23;c.stroke();path();c.strokeStyle=level>2?'#c4bda0':'#b5a883';c.lineWidth=18;c.stroke();
+      c.save();path();c.lineWidth=17;const rng=random(mask*19+level);
+      // Irregular cobbles stay inside each connected arm rather than filling a tile.
+      for(let y=1;y<40;y+=6)for(let x=1;x<40;x+=7){
+        const xx=x+rng()*2,yy=y+rng()*2;if(!c.isPointInStroke((xx+12)*2,(yy+12)*2))continue;
+        c.fillStyle=rng()>.45?'#d0c4a2':'#8d896e';c.beginPath();c.roundRect(xx-2,yy-1,4+rng()*2,3,1);c.fill();
+      }c.restore();
+      if(level>=4){path();c.strokeStyle='#ddd0a570';c.lineWidth=2;c.stroke();}
+      if(level>=5){this.stone(c,17,17,6,6);}
+    }else{
+      path();c.strokeStyle='#20332666';c.lineWidth=26;c.stroke();path();c.strokeStyle=type==='wall'?'#696f62':'#61452e';c.lineWidth=22;c.stroke();path();c.strokeStyle=type==='wall'?'#b3b5a1':'#ad8556';c.lineWidth=16;c.stroke();
+      for(const [x,y]of arms){const vertical=x===20;for(let i=0;i<=20;i+=6){const xx=20+(x-20)*i/20,yy=20+(y-20)*i/20;
+        c.fillStyle=type==='wall'?'#e0dac1':'#e0ba80';if(vertical){c.fillRect(xx-12,yy-2,5,4);c.fillRect(xx+7,yy-2,5,4);}else{c.fillRect(xx-2,yy-12,4,5);c.fillRect(xx-2,yy+7,4,5);}
+        if(type==='palisade'){c.strokeStyle='#684c31';c.lineWidth=1;c.beginPath();c.moveTo(xx-(vertical?7:0),yy-(vertical?0:7));c.lineTo(xx+(vertical?7:0),yy+(vertical?0:7));c.stroke();}
+      }}
+      this.circle(c,20,20,5,type==='wall'?'#b3b5a1':'#ad8556');
+      if(level>1){path();c.strokeStyle=level>3?'#d2bb7d':'#596660';c.lineWidth=2;c.stroke();
+        for(const [x,y]of arms){const xx=(x+20)/2,yy=(y+20)/2;if(level>=3){this.stone(c,xx-3,yy-3,6,6);}else{c.fillStyle='#666b60';c.fillRect(xx-2,yy-3,4,6);}}
+        if(level>=4)this.towerTop(c,12,12,16,false);if(level>=5)this.roof(c,14,14,12,12,'dark');
+      }
+    }
+    this.cache.set(key,canvas);return canvas;
+  }
+  alternateKeep(c,level,design){
+    if(design===1){
+      // The Highland hall is an open timber compound with a long cross-gabled roof.
+      c.fillStyle='#7d8056';c.fillRect(3,3,114,114);this.fence(c,7,7,106,106);
+      const palette=level>3?'dark':level>1?'terra':'straw';
+      this.roof(c,32,13,56,92,palette);this.roof(c,16,35,88,36,palette,'horizontal');
+      for(const [x,y]of [[9,9],[95,9],[9,95],[95,95]]){
+        if(level>=3)this.towerTop(c,x-2,y-2,20);
+        else this.roof(c,x,y,16,16,'terra');
+      }
+      this.stone(c,44,22,8,12);this.stone(c,70,79,8,12);
+      if(level>1){this.roof(c,10,73,18,19,'terra');this.roof(c,92,73,18,19,'terra');}
+      if(level>3){this.stone(c,27,107,66,7);c.fillStyle='#e1c178';c.fillRect(55,109,10,3);}
+    }else{
+      // The Citadel has a radial silhouette, round bastions and a central court.
+      this.polygon(c,[[24,4],[96,4],[116,24],[116,96],[96,116],[24,116],[4,96],[4,24]],'#b9b29a','#e0d2aa');
+      this.polygon(c,[[27,17],[93,17],[103,27],[103,93],[93,103],[27,103],[17,93],[17,27]],'#807e61');
+      this.roof(c,32,15,56,30,level>2?'dark':'slate','horizontal');this.roof(c,17,41,23,49,'slate');this.roof(c,80,41,23,49,'slate');
+      for(const [x,y]of [[17,17],[103,17],[17,103],[103,103]]){
+        this.circle(c,x+2,y+3,15,'#2f403d55');this.circle(c,x,y,14,'#c1c3ae');this.circle(c,x,y,10,'#405c64');
+        for(let i=0;i<8;i++){const a=i*Math.PI/4;this.polygon(c,[[x,y],[x+Math.cos(a)*10,y+Math.sin(a)*10],[x+Math.cos(a+.78)*10,y+Math.sin(a+.78)*10]],i<4?'#587a81':'#799591');}
+        this.circle(c,x,y,2,'#e2c47d');
+      }
+      this.circle(c,60,71,13,'#bdc0a2');this.circle(c,60,71,10,'#497f81');this.circle(c,60,71,4,'#ddd8b5');
+      this.roof(c,44,96,32,18,level>2?'dark':'slate','horizontal');
+      if(level>1){this.roof(c,41,46,12,14,'terra');this.roof(c,67,46,12,14,'terra');}
+      if(level>3){this.stone(c,42,11,36,5);this.roof(c,48,5,24,26,'dark');}
+    }
+  }
+  building(type,level=1,connections=10,design=0){
+    if(['road','wall','palisade'].includes(type))return this.infrastructure(type,level,connections);
+    const key=`${type}:${level}:${design}`;if(this.cache.has(key))return this.cache.get(key);
     const s=BUILDINGS[type].size*TILE,pad=12,canvas=document.createElement('canvas');canvas.width=(s+pad*2)*2;canvas.height=(s+pad*2)*2;
     const c=canvas.getContext('2d');c.scale(2,2);c.translate(pad,pad);
     const rng=random(type.split('').reduce((v,k)=>v+k.charCodeAt(0),0));
@@ -48,6 +109,7 @@ export class Art {
     }
     if(type==='road'){
       c.fillStyle='#aaa080';c.fillRect(0,0,s,s);for(let y=0;y<s;y+=10)for(let x=0;x<s;x+=13)this.stone(c,x+(y%20?4:0),y,11,8);
+    }else if(type==='keep'&&design){this.alternateKeep(c,level,design);
     }else if(type==='keep'){
       this.stone(c,8,8,104,8);this.stone(c,8,8,8,104);this.stone(c,104,8,8,104);this.stone(c,8,104,43,8);this.stone(c,69,104,43,8);
       c.fillStyle='#c0b490';c.fillRect(43,77,34,31);for(let j=0;j<5;j++){c.strokeStyle='#7c816948';c.beginPath();c.moveTo(43,80+j*6);c.lineTo(77,80+j*6);c.stroke();}
@@ -90,13 +152,10 @@ export class Art {
       this.roof(c,13,8,48,58,'terra');this.roof(c,49,37,24,32,'terra','horizontal');this.stone(c,21,15,8,10);
       this.fence(c,5,4,70,71);this.circle(c,10,67,4,'#556b40');
     }
-    if(level>1&&type!=='road'&&type!=='farm'){
-      c.fillStyle='#dcc48a';for(let i=0;i<level;i++)c.fillRect(s/2-level*3+i*6,3,3,3);
-      if(level>3&&!['wall','palisade','gate'].includes(type)){c.strokeStyle='#d8c48a';c.lineWidth=2;c.strokeRect(3,3,s-6,s-6);}
-    }
+    paintBuildingUpgrades(this,c,type,level,s,design);
     this.cache.set(key,canvas);return canvas;
   }
-  thumbnail(type,level=1){const key=`${type}:${level}`;if(!this.thumbnails.has(key))this.thumbnails.set(key,this.building(type,level).toDataURL());return this.thumbnails.get(key);}
+  thumbnail(type,level=1,design=0){const key=`${type}:${level}:${design}`;if(!this.thumbnails.has(key))this.thumbnails.set(key,this.building(type,level,10,design).toDataURL());return this.thumbnails.get(key);}
   tree(c,x,y,s=1,shade=.5){
     const r=17*s;this.circle(c,x+4,y+5,r,'#1d2f2350');
     const blobs=[[0,0,1],[-.5,-.2,.62],[.38,-.45,.66],[.45,.35,.62],[-.27,.49,.62]];

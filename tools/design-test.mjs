@@ -26,7 +26,7 @@ try{
     let i=0;for(const type of Object.keys(BUILDINGS)){const b=a.game.addBuilding(type,24+(i%5)*4,19+Math.floor(i/5)*5,true);b.level=1+i%5;if(type==='house'){b.complete=false;b.progress=4;}if(type==='warehouse')b.hp*=.4;i++;}
     for(let j=0;j<6;j++)a.game.addUnit(['worker','militia','spear','archer','crossbow','knight'][j],1000+j*40,1530);
     for(let j=0;j<4;j++)a.game.spawnEnemy(['raider','ogre','dragon','conqueror'][j],1550+j*55,1510);
-    a.game.ships.push({x:800,y:290,landed:false});a.game.revision++;a.renderer.terrain=null;a.renderer.camera={x:1330,y:1090,zoom:.8};a.ui.toastUntil=0;
+    a.game.ships.push({x:800,y:290,landed:false,units:['raider','bow','raider','bow','barbarian','raider','elite','captain']});a.game.revision++;a.renderer.terrain=null;a.renderer.camera={x:1330,y:1090,zoom:.8};a.ui.toastUntil=0;
   });await page.waitForTimeout(250);await page.screenshot({path:'artifacts/redesign/structures.jpg',type:'jpeg',quality:88});
   await page.evaluate(()=>{const a=window.__tidehold;a.renderer.camera={x:1270,y:950,zoom:.46};});await page.waitForTimeout(250);await page.screenshot({path:'artifacts/redesign/mountains.jpg',type:'jpeg',quality:88});
   await page.evaluate(()=>{const a=window.__tidehold;a.renderer.camera={x:1120,y:870,zoom:1.4};});await page.waitForTimeout(200);await page.screenshot({path:'artifacts/redesign/roofs-close.jpg',type:'jpeg',quality:88});
