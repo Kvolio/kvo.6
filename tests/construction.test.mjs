@@ -14,9 +14,9 @@ test('drag plans form connected corners, skip existing junctions, and spend once
   const extension=g.placeBatch('road',constructionLine({tx:39,ty:33},{tx:41,ty:33}));assert.equal(extension.length,2);assert.equal(g.resources.stone,before-30);
 });
 test('invalid or unaffordable drag rejects the entire plan without losing resources',()=>{
-  const g=kingdom(),cells=constructionLine({tx:35,ty:30},{tx:40,ty:30});Object.assign(g.world.tile(39,30),{resource:'stone',amount:20});
+  const g=kingdom(),cells=constructionLine({tx:35,ty:30},{tx:40,ty:30});Object.assign(g.world.tile(39,30),{type:'mountain'});
   const before={...g.resources};assert.equal(g.placeBatch('palisade',cells),false);assert.equal(g.buildings.length,1);assert.deepEqual(g.resources,before);
-  g.world.tile(39,30).resource=null;g.resources.wood=13;assert.equal(g.placeBatch('palisade',cells),false);assert.equal(g.resources.wood,13);assert.equal(g.buildings.length,1);
+  g.world.tile(39,30).type='grass';g.resources.wood=13;assert.equal(g.placeBatch('palisade',cells),false);assert.equal(g.resources.wood,13);assert.equal(g.buildings.length,1);
 });
 test('workers complete queued sites without manual assignment, then return to their farms',()=>{
   const g=kingdom(),farm=g.addBuilding('farm',34,33,true);for(const u of g.units)g.assign(u,farm,'gather');

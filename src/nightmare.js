@@ -1,4 +1,4 @@
-import {ENEMIES,TILE,nightmareComposition} from './data.js';
+import {ENEMIES,TILE,nightmareComposition,DIFFICULTIES,difficultyValue} from './data.js';
 import {random,distance} from './world.js';
 
 export const Nightmare={
@@ -38,12 +38,12 @@ export const Nightmare={
     }return result;
   },
   telegraph(source,kind,point,radius,delay,damage,options={}){
-    const hazard={id:++this.id,sourceId:source.id,kind,x:point.x,y:point.y,radius,remaining:delay,duration:delay,damage,...options};
-    this.hazards.push(hazard);source.casting=kind;source.castUntil=this.time+delay;this.sound('warning');return hazard;
+    const hazard={id:++this.id,sourceId:source.id,kind,x:point.x,y:point.y,radius,remaining:delay,duration:delay,damage:damage*difficultyValue(this.difficulty,'damage',this.wave)/(['hard','nightmare'].includes(this.difficulty)?DIFFICULTIES[this.difficulty].damage:1),...options};
+    this.hazards.push(hazard);source.casting=kind;source.castUntil=this.time+delay;return hazard;
   },
   beginDemonLordPhase(e){
     if(e.phase)return;e.phase='healing';e.healRemaining=5;e.hp=Math.max(1,e.hp);e.path=[];
-    this.notice('Obsidian rebirth! The Demon Lord heals for five seconds. Spread your defenders.');this.sound('boss');
+    this.sound('boss');
     this.telegraph(e,'rebirth',e,200,5,90,{burn:4});
   },
   updateNightmare(dt){
@@ -77,7 +77,7 @@ export const Nightmare={
     const d=ENEMIES[e.type];if(e.type==='demonlord'&&e.hp<=e.maxHp*.5&&!e.phase)this.beginDemonLordPhase(e);
     if(e.phase==='healing'){
       e.healRemaining-=dt;e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.08*dt);
-      if(e.healRemaining<=0){e.phase=2;e.abilityClock=0;this.notice('The Demon Lord charges the Keep! Reinforce the heart of your kingdom.');this.sound('boss');}
+      if(e.healRemaining<=0){e.phase=2;e.abilityClock=0;this.sound('boss');}
       return true;
     }
     if(e.groundedUntil&&this.time>=e.groundedUntil){this.setAirborne(e,true);e.groundedUntil=null;}
@@ -85,15 +85,15 @@ export const Nightmare={
     e.abilityClock-=dt;if(e.abilityClock>0||!target||distance(e,target)>650)return false;
     e.abilityClock=e.phase===2?3.5:d.abilityInterval||8;const step=e.abilityStep||0;e.abilityStep=step+1;
     if(d.ability==='archdemon'){
-      if(step%4===0){const sites=this.portalSites(),rng=random(this.world.seed+e.id+step);if(sites.length)this.openPortal(sites[Math.floor(rng()*sites.length)],['skeleton','hellhound','demonwarrior','infernalarcher','skeleton'],{delay:2});this.notice('The ArchDemon tears open another portal.');}
-      if(step%4===1){this.telegraph(e,'dive',target,115,2.5,155,{burn:5});this.notice('Descending blade! Leave the marked ground. The ArchDemon will be vulnerable to melee after landing.');}
-      if(step%4===2){e.wardUntil=this.time+10;this.summonNear(e,['dreadguard','demonwarrior'],true);this.notice('Portal ward! Defeat the marked guardians to break the ArchDemon’s shield.');}
-      if(step%4===3){for(const [dx,dy]of [[0,0],[135,0],[-135,0],[0,135],[0,-135]])this.telegraph(e,'flamecross',{x:target.x+dx,y:target.y+dy},70,2.2,130,{burn:5});this.notice('Hellfire cross! Move between the marked circles.');}
+      if(step%4===0){const sites=this.portalSites(),rng=random(this.world.seed+e.id+step);if(sites.length)this.openPortal(sites[Math.floor(rng()*sites.length)],['skeleton','hellhound','demonwarrior','infernalarcher','skeleton'],{delay:2});}
+      if(step%4===1){this.telegraph(e,'dive',target,115,2.5,155,{burn:5});}
+      if(step%4===2){e.wardUntil=this.time+10;this.summonNear(e,['dreadguard','demonwarrior'],true);}
+      if(step%4===3){for(const [dx,dy]of [[0,0],[135,0],[-135,0],[0,135],[0,-135]])this.telegraph(e,'flamecross',{x:target.x+dx,y:target.y+dy},70,2.2,130,{burn:5});}
     }else if(d.ability==='demonlord'){
       this.summonNear(e,e.phase===2?['hellhound','demonknight','skeleton','skeleton','demonwarrior']:['skeleton','demonwarrior','hellhound']);
-      if(step%3===0){const b=this.buildings.filter(b=>b.hp>0&&b.type!=='road').sort((a,b)=>distance(e,b)-distance(e,a))[0];if(b){const h=this.telegraph(e,'hurl',b,85,2,130,{spawn:'demonwarrior'});h.fromX=e.x;h.fromY=e.y;this.notice('The Demon Lord hurls a warrior into your rear defenses!');}}
-      if(step%3===1){const targets=this.units.filter(u=>u.type!=='worker').slice().sort((a,b)=>distance(e,a)-distance(e,b));for(const t of [target,...targets.filter((_,i)=>i%8===0).slice(0,2)])this.telegraph(e,'eruption',t,105,2.8,180,{burn:6});this.notice('Hellfire eruptions! Split your army and leave the marked circles.');}
-      if(step%3===2){this.telegraph(e,'doomring',e,245,2.5,120,{inner:90,burn:4});this.notice('Ring of ruin! Get close to the Demon Lord or retreat beyond the ring.');}
+      if(step%3===0){const b=this.buildings.filter(b=>b.hp>0&&b.type!=='road').sort((a,b)=>distance(e,b)-distance(e,a))[0];if(b){const h=this.telegraph(e,'hurl',b,85,2,130,{spawn:'demonwarrior'});h.fromX=e.x;h.fromY=e.y;}}
+      if(step%3===1){const targets=this.units.filter(u=>u.type!=='worker').slice().sort((a,b)=>distance(e,a)-distance(e,b));for(const t of [target,...targets.filter((_,i)=>i%8===0).slice(0,2)])this.telegraph(e,'eruption',t,105,2.8,180,{burn:6});}
+      if(step%3===2){this.telegraph(e,'doomring',e,245,2.5,120,{inner:90,burn:4});}
     }else if(d.ability==='summon')this.summonNear(e,['skeleton','skeleton','hellhound']);
     else if(d.ability==='rally'){
       for(const ally of this.enemies)if(distance(e,ally)<260){ally.hp=Math.min(ally.maxHp,ally.hp+ally.maxHp*.07);ally.rallyUntil=this.time+6;}
@@ -108,16 +108,16 @@ export const Nightmare={
   nightmareBossAbility(e,target){
     const d=ENEMIES[e.type],damage=d.damage*.9;
     switch(e.type){
-      case 'captain':this.summonNear(e,['raider','raider','bow']);this.notice('Captain’s reserve! Reinforcements rally around the banner.');break;
-      case 'chief':this.telegraph(e,'axe sweep',target,115,2,damage);e.rageUntil=this.time+6;this.notice('The Chief enters a frenzy. Evade the axe sweep.');break;
+      case 'captain':this.summonNear(e,['raider','raider','bow']);break;
+      case 'chief':this.telegraph(e,'axe sweep',target,115,2,damage);e.rageUntil=this.time+6;break;
       case 'brute':case 'champion':this.telegraph(e,'boulder',target,95,2.4,damage*1.3);if(e.type==='champion')e.rageUntil=this.time+6;break;
       case 'giant':{const angle=Math.atan2(target.y-e.y,target.x-e.x);for(let i=1;i<=3;i++)this.telegraph(e,'rolling stone',{x:e.x+Math.cos(angle)*i*100,y:e.y+Math.sin(angle)*i*100},65,1.8+i*.35,damage);break;}
-      case 'titan':for(let i=1;i<=3;i++)this.telegraph(e,'aftershock',e,120+i*70,1.5+i*.6,damage*.75,{inner:55+(i-1)*70});this.notice('Titan aftershocks! Retreat beyond the rings or stay close.');break;
-      case 'blackknight':e.wardUntil=this.time+9;this.summonNear(e,['elite','elite'],true);this.notice('The Black Knight’s oathguard protects him. Defeat the marked guards.');break;
+      case 'titan':for(let i=1;i<=3;i++)this.telegraph(e,'aftershock',e,120+i*70,1.5+i*.6,damage*.75,{inner:55+(i-1)*70});break;
+      case 'blackknight':e.wardUntil=this.time+9;this.summonNear(e,['elite','elite'],true);break;
       case 'warlord':this.summonNear(e,['bow','berserker']);for(const u of this.units.filter(u=>u.type!=='worker').slice(0,2))this.telegraph(e,'arrow storm',u,85,2.4,damage);break;
       case 'dragonknight':this.telegraph(e,'cinder ring',target,165,2.4,damage,{inner:65,burn:5});break;
-      case 'dragon':this.telegraph(e,'wing tempest',e,240,2.8,damage,{inner:85});this.notice('Wing tempest! Evacuate the marked ring.');break;
-      case 'conqueror':for(const u of [target,...this.units.filter(u=>u.type!=='worker').slice(0,2)])this.telegraph(e,'royal reckoning',u,95,2.6,damage*1.2);this.notice('Royal reckoning! Split your defenders before the strikes land.');break;
+      case 'dragon':this.telegraph(e,'wing tempest',e,240,2.8,damage,{inner:85});break;
+      case 'conqueror':for(const u of [target,...this.units.filter(u=>u.type!=='worker').slice(0,2)])this.telegraph(e,'royal reckoning',u,95,2.6,damage*1.2);break;
     }
   }
 };

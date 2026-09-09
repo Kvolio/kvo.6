@@ -1,4 +1,4 @@
-import {BUILDINGS,UNITS,ENEMIES,TILE} from './data.js';
+import {BUILDINGS,UNITS,ENEMIES,TILE,difficultyValue} from './data.js';
 import {distance} from './world.js';
 
 // Nearby candidates are scanned without sorting entire armies every frame.
@@ -9,7 +9,7 @@ export class CombatGrid{
 
 export const Combat={
   spawnEnemy(type,x,y){
-    const d=ENEMIES[type],factor=this.difficulty==='easy'?.75:this.difficulty==='hard'?1.25:this.difficulty==='nightmare'?1.45:1;
+    const d=ENEMIES[type],factor=difficultyValue(this.difficulty,'hp',this.wave);
     const e={id:++this.id,type,x,y,hp:d.hp*factor,maxHp:d.hp*factor,cooldown:0,abilityClock:d.boss?5:8,path:[],pathRevision:-1,decisionClock:0};this.enemies.push(e);return e;
   },
   stoneStructure(t){return !!BUILDINGS[t.type]&&(['keep','wall','gate','tower','ballista','quarry','ironmine','goldmine','smith','road'].includes(t.type)||t.level>=3&&!['farm','lumber','palisade'].includes(t.type));},
@@ -20,7 +20,7 @@ export const Combat={
   attackDamage(source){
     const d=ENEMIES[source.type]||UNITS[source.type]||BUILDINGS[source.type];
     if(BUILDINGS[source.type]?.damage)return this.towerDamage(source);
-    if(ENEMIES[source.type])return d.damage*(this.difficulty==='easy'?.85:this.difficulty==='hard'?1.15:this.difficulty==='nightmare'?1.3:1)*(1+(source.auraBonus||0)+(source.rallyUntil>this.time?.2:0))*(source.phase===2?1.15:1);
+    if(ENEMIES[source.type])return d.damage*difficultyValue(this.difficulty,'damage',this.wave)*(1+(source.auraBonus||0)+(source.rallyUntil>this.time?.2:0))*(source.phase===2?1.15:1);
     return d.damage*(1+this.tech*.15)*(1+this.researchBonus(d.range>85?'ranged':'melee'));
   },
   damageEntity(source,target,raw,{area=false,burn=false}={}){

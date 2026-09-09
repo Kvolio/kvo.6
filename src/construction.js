@@ -34,19 +34,28 @@ export const Construction = {
       const existing=this.world.buildingAt(layout,tx,ty);
       if(LINE_BUILDINGS.includes(type)&&existing?.type===type)continue;
       const reason=this.world.placementReason(type,tx,ty,layout);if(reason)return fail(reason);
-      // A blueprint must not entomb a standing worker or soldier.
-      if(this.units.some(u=>u.hp>0&&u.x>=tx*TILE&&u.y>=ty*TILE&&u.x<(tx+d.size)*TILE&&u.y<(ty+d.size)*TILE)&&!['road','gate'].includes(type))return fail('Move your people out of this site first.');
       const site={type,tx,ty,rotation:((rotation%4)+4)%4,hp:1,id:-sites.length-1};sites.push(site);layout.push(site);
       for(const [r,n]of Object.entries(d.cost))cost[r]=(cost[r]||0)+n;
     }
     if(!sites.length)return fail('These sections are already built or queued.');
     if(!this.afford(cost))return fail('Not enough resources for the whole plan.');
-    return {reason:'',cost,sites};
+    const evacuations=[],occupied=this.world.blocked(layout);
+    if(!['road','gate'].includes(type))for(const u of [...this.units,...this.enemies]){
+      if(u.hp<=0||this.isAirborne(u)||!sites.some(s=>u.x>=s.tx*TILE&&u.y>=s.ty*TILE&&u.x<(s.tx+d.size)*TILE&&u.y<(s.ty+d.size)*TILE))continue;
+      // Search the existing connected region before the footprint becomes solid.
+      const reachable=this.world.reachable(u,this.buildings,this.revision);
+      let point=null,nearest=Infinity;for(const id of reachable){if(occupied.has(id))continue;const t=this.world.tiles[id],p={x:(t.x+.5)*TILE,y:(t.y+.5)*TILE},d=distance(p,u);if(d<nearest){nearest=d;point=p;}}
+      if(!point)return fail('Leave room beside this site for units to move out.');
+      evacuations.push({u,point});
+    }
+    return {reason:'',cost,sites,evacuations};
   },
   placeBatch(type,cells,rotation=0){
     const plan=this.planConstruction(type,cells,rotation);
     if(plan.reason){this.notice(plan.reason);return false;}
-    this.spend(plan.cost);
+    this.spend(plan.cost);this.noteAction();
+    for(const {u,point} of plan.evacuations){Object.assign(u,point);u.path=[];u.pathRevision=-1;}
+    for(const site of plan.sites)for(let y=site.ty;y<site.ty+BUILDINGS[type].size;y++)for(let x=site.tx;x<site.tx+BUILDINGS[type].size;x++)Object.assign(this.world.tile(x,y),{resource:null,amount:0,clearing:false});
     const result=plan.sites.map(site=>{const b=this.addBuilding(type,site.tx,site.ty);b.rotation=site.rotation;return b;});
     this.stats.built+=result.length;this.scheduleConstruction();this.sound('build');
     this.notice(`${result.length>1?result.length+' sections':BUILDINGS[type].name} queued. Workers will build automatically.`);
@@ -61,7 +70,7 @@ export const Construction = {
     if(!b||!b.complete||b.hp<=0||b.upgrade||!['building','range','damage'].includes(kind))return false;
     if(kind==='building'?b.level>=5:!BUILDINGS[b.type].damage||(b[kind+'Level']||0)>=4)return false;
     const cost=this.upgradeCost(b,kind);if(!this.spend(cost)){this.notice('Not enough resources for this upgrade.');return false;}
-    b.upgrade={kind,progress:0,duration:12+8*b.level,cost};this.scheduleConstruction();
+    this.noteAction();b.upgrade={kind,progress:0,duration:12+8*b.level,cost};this.scheduleConstruction();
     this.notice('Upgrade queued. Workers will complete it on site.');return true;
   },
   cancelUpgrade(b){
@@ -75,7 +84,7 @@ export const Construction = {
   clearResource(tileId){
     const tile=this.world.tiles[tileId];if(!tile?.resource||tile.amount<=0)return false;
     if(tile.resource==='iron'||tile.resource==='gold')if(this.level<2){this.notice('Upgrade the Keep to level 2 to extract this mineral.');return false;}
-    tile.clearing=true;this.scheduleConstruction();this.notice('Clearing queued. Workers will extract and deliver the resource before the site becomes buildable.');return true;
+    this.noteAction();tile.clearing=true;this.scheduleConstruction();this.notice('Clearing queued. Workers will extract and deliver the resource so the resources can be recovered.');return true;
   },
   finishConstructionJob(u){
     const previous=u.returnJob;u.returnJob=null;u.job=null;u.path=[];u.pathRevision=-1;

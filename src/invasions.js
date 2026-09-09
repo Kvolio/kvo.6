@@ -6,7 +6,7 @@ export const Invasions={
     if(this.active||this.over)return false;
     if(this.difficulty==='nightmare'&&this.wave>=50)return this.startDemonWave();
     const sites=this.world.landingSites();if(!sites.length){this.notice('No landing coast is available.');return false;}
-    this.wave++;this.active=true;this.timer=0;
+    this.noteAction();if(this.tutorial)this.tutorial.done=true;this.wave++;this.active=true;this.timer=0;
     const rng=random(this.world.seed+this.wave*7919),types=waveComposition(this.wave,this.difficulty),ground=types.filter(t=>!ENEMIES[t].flying);
     // Shuffle with a saved-map seed: repeatable, but each wave can use new beaches.
     const shuffled=[...sites];for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
@@ -33,7 +33,7 @@ export const Invasions={
   },
   canDamage(source,target){
     if(target.garrison&&ENEMIES[source.type]&&!this.isAirborne(source)&&ENEMIES[source.type].range<=85)return false;
-    if(this.isAirborne(target)){const ranged=UNITS[source.type]||ENEMIES[source.type];return source.type==='ballista'||!!ranged&&ranged.range>85;}
+    if(this.isAirborne(target)){const ranged=UNITS[source.type]||ENEMIES[source.type];return (BUILDINGS[source.type]?.range||0)>85||!!ranged&&ranged.range>85;}
     return true;
   },
   updateShips(dt){

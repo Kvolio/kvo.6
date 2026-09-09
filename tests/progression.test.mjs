@@ -25,7 +25,7 @@ test('research pauses with simulation and without a Blacksmith, then resumes aft
   const g=kingdom();g.research('forestry');g.paused=true;tick(g,10);assert.equal(g.researchTask.progress,0);g.paused=false;tick(g,10);const smith=g.buildings.find(b=>b.type==='smith');smith.hp=0;g.clean();const before=g.researchTask.progress;tick(g,10);assert.equal(g.researchTask.progress,before);const restored=Game.restore(JSON.parse(JSON.stringify(g.serialize())));restored.addBuilding('smith',38,27,true);tick(restored,31);assert.ok(restored.researched.includes('forestry'));assert.equal(restored.researchTask,null);
 });
 test('learned technologies change real damage, armor, tower stats and training speed',()=>{
-  const g=kingdom(),u=g.addUnit('militia',1000,1000),e=g.spawnEnemy('raider',1010,1000),hp=e.hp;g.researched=['steel','armor','fletching','surveying','siegecraft','drill'];g.hit(u,e,.1);assert.ok(Math.abs(hp-e.hp-16.8)<.001);const friendlyHp=u.hp;g.hit(e,u,.1);assert.equal(friendlyHp-u.hp,4);
+  const g=kingdom(),u=g.addUnit('militia',1000,1000),e=g.spawnEnemy('raider',1010,1000),hp=e.hp;g.researched=['steel','armor','fletching','surveying','siegecraft','drill'];g.hit(u,e,.1);assert.ok(Math.abs(hp-e.hp-16.8)<.001);const friendlyHp=u.hp;g.hit(e,u,.1);assert.ok(Math.abs(friendlyHp-u.hp-(g.attackDamage(e)-4))<.001);
   const tower=g.addBuilding('tower',40,30,true);assert.equal(g.towerRange(tower),276);assert.ok(Math.abs(g.towerDamage(tower)-21.6)<.001);e.hp=0;g.clean();g.recruit('militia');const n=g.units.length;tick(g,10);assert.equal(g.units.length,n+1);
 });
 test('all technology branches are acyclic and reachable through their stated prerequisites',()=>{

@@ -66,7 +66,7 @@ function encounter(wave,difficulty,formation,dodge){
   const result={scenario:'established-kingdom',waveRequested:wave,difficulty,formation,dodge,startingArmy,startingStructures,...run(g,300,policy,true)};if(g.routeChecks)result.routeChecks=g.routeChecks;results.push(result);console.log(JSON.stringify(result));return g;
 }
 await mkdir('artifacts/playtest',{recursive:true});
-if(!process.argv.includes('--encounters')&&!process.argv.includes('--finale'))for(const difficulty of ['normal','hard','nightmare'])for(const seed of [42,707])opening(seed,difficulty);
+if(!process.argv.includes('--encounters')&&!process.argv.includes('--finale'))for(const difficulty of ['easy','normal','hard','nightmare'])for(const seed of [42,707])opening(seed,difficulty);
 if(!process.argv.includes('--openings')&&!process.argv.includes('--finale'))for(const [wave,difficulty] of [[10,'hard'],[30,'hard'],[50,'hard'],[55,'nightmare'],[60,'nightmare']])for(const [formation,dodge] of [['open',false],['fortified',true]])encounter(wave,difficulty,formation,dodge);
 if(!process.argv.includes('--openings'))encounter(60,'nightmare','citadel',true);
 await writeFile('artifacts/playtest/'+(process.argv.includes('--openings')?'openings':process.argv.includes('--finale')?'finale':'encounters')+'.json',JSON.stringify(results,null,2));

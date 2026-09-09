@@ -30,7 +30,7 @@ export const Progression={
   recruit(type){
     const reason=this.recruitmentReason(type);if(reason){this.notice(reason);return false;}
     const d=UNITS[type],b=this.buildings.filter(b=>b.type===d.building&&b.complete&&b.hp>0&&(b.training?.length||0)<5&&this.world.accessPoints(b,this.buildings).length).sort((a,b)=>(a.training?.length||0)-(b.training?.length||0))[0];
-    this.spend(d.cost);b.training??=[];b.training.push({id:++this.id,type,progress:0,duration:TRAINING_SECONDS[type]});
+    this.spend(d.cost);this.noteAction();b.training??=[];b.training.push({id:++this.id,type,progress:0,duration:TRAINING_SECONDS[type]});
     this.notice(`${d.name} queued at ${BUILDINGS[b.type].name}. ${TRAINING_SECONDS[type]} seconds of training.`);return true;
   },
   cancelTraining(b,id){
@@ -50,7 +50,7 @@ export const Progression={
   },
   research(id){
     const reason=this.researchReason(id);if(reason){this.notice(reason);return false;}
-    const t=TECHNOLOGIES[id];this.spend(t.cost);this.researchTask={id,progress:0,duration:t.time};this.notice(`${t.name} research started.`);return true;
+    const t=TECHNOLOGIES[id];this.spend(t.cost);this.noteAction();this.researchTask={id,progress:0,duration:t.time};this.notice(`${t.name} research started.`);return true;
   },
   cancelResearch(){
     if(!this.researchTask)return false;

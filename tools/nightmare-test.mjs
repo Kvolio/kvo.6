@@ -13,11 +13,11 @@ try{for(const spec of [{name:'desktop',width:1440,height:900,touch:false},{name:
   await page.evaluate(()=>{const a=window.__tidehold,g=a.game;const p=g.portals.find(p=>p.queue.length);a.renderer.camera={x:p.x,y:p.y,zoom:1.2};g.updateNightmare(3);a.ui.update();});
   await page.waitForTimeout(200);await page.screenshot({path:`artifacts/nightmare/${spec.name}-portals.png`});
   await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.enemies=[];g.portals=[];g.hazards=[];g.wave=55;g.timer=10000;for(let y=35;y<48;y++)for(let x=40;x<60;x++)Object.assign(g.world.tile(x,y),{type:'grass',resource:null,amount:0});g.revision++;a.renderer.terrain=null;const e=g.spawnEnemy('archdemon',g.keep.x+280,g.keep.y+50);e.abilityStep=1;e.abilityClock=0;g.bossAbilities(e,.1,{x:g.keep.x+100,y:g.keep.y+120});g.selected=[e.id];a.renderer.camera={x:e.x-80,y:e.y+50,zoom:.9};a.ui.selection();a.ui.update();});
-  assert.match(await page.locator('#enemy-details').innerText(),/Airborne/);assert.match(await page.locator('#boss').innerText(),/RANGED ONLY/);
+  assert.match(await page.locator('#enemy-details').innerText(),/Airborne/);assert.equal(await page.locator('#boss').innerText(),'The ArchDemon');
   await page.waitForTimeout(200);await page.screenshot({path:`artifacts/nightmare/${spec.name}-archdemon.png`});
   await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.updateNightmare(3);a.ui.update();});assert.equal(await page.evaluate(()=>window.__tidehold.game.isAirborne(window.__tidehold.game.enemies.find(e=>e.type==='archdemon'))),false);
   await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.enemies=[];g.hazards=[];g.wave=60;const e=g.spawnEnemy('demonlord',g.keep.x+300,g.keep.y+60);e.hp=e.maxHp*.49;g.bossAbilities(e,1,g.keep);g.selected=[e.id];a.ui.selection();a.ui.update();});
-  assert.match(await page.locator('#boss').innerText(),/REBIRTH/);await page.waitForTimeout(200);await page.screenshot({path:`artifacts/nightmare/${spec.name}-rebirth.png`});
+  assert.equal(await page.locator('#boss').innerText(),'The Demon Lord');await page.waitForTimeout(200);await page.screenshot({path:`artifacts/nightmare/${spec.name}-rebirth.png`});
   await page.locator('#menu').click();await page.locator('#save').click();await page.locator('[data-close]').click();await page.reload();await page.locator('#continue').click();
   assert.equal(await page.evaluate(()=>window.__tidehold.game.enemies.find(e=>e.type==='demonlord').phase),'healing');
   await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.paused=true;const e=g.enemies.find(e=>e.type==='demonlord');for(let i=0;i<4;i++)g.bossAbilities(e,1,g.keep);e.abilityClock=0;e.abilityStep=1;g.bossAbilities(e,.1,g.keep);a.ui.update();});

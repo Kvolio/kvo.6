@@ -33,7 +33,7 @@ test('mine validation and assignment exclude unreachable minerals',()=>{
   assert.equal(g.assign(u,b,'gather'),true);tick(g,55);assert.ok(g.resources.stone>150);assert.equal(g.world.tile(37,30).amount,2100);
 });
 test('workers return partial loads from depleted deposits and report a blocked route once',()=>{
-  const g=flat();Object.assign(g.world.tile(36,31),{type:'foothill',resource:'stone',amount:3});const b=g.addBuilding('quarry',35,28,true),u=g.units[0],messages=[];g.notice=m=>messages.push(m);assert.ok(g.assign(u,b,'gather'));tick(g,70);assert.equal(g.resources.stone,153);assert.equal(g.world.tile(36,31).resource,null);assert.equal(messages.filter(m=>m.includes('No reachable stone')).length,1);
+  const g=flat(),startingStone=g.resources.stone;Object.assign(g.world.tile(36,31),{type:'foothill',resource:'stone',amount:3});const b=g.addBuilding('quarry',35,28,true),u=g.units[0],messages=[];g.notice=m=>messages.push(m);assert.ok(g.assign(u,b,'gather'));tick(g,70);assert.equal(g.resources.stone,startingStone+3);assert.equal(g.world.tile(36,31).resource,null);assert.equal(messages.filter(m=>m.includes('No reachable stone')).length,1);
 });
 test('existing version 1 maps are loaded verbatim without inserting mountain ranges',()=>{
   const g=flat(),save=JSON.parse(JSON.stringify(g.serialize()));save.tiles=save.tiles.map(({elevation,pass,...t})=>t);const old=JSON.stringify(save.tiles);const restored=Game.restore(save);assert.equal(JSON.stringify(restored.world.tiles),old);assert.equal(restored.world.ranges,undefined);tick(restored,1);assert.equal(JSON.stringify(restored.world.tiles),old);

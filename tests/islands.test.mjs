@@ -52,10 +52,10 @@ test('boats cannot unload through shoreline walls',()=>{
   const g=new Game(9,'hard');g.startWave();const s=g.ships[0];s.x=s.targetX;s.y=s.targetY;s.delay=0;const b=g.addBuilding('wall',Math.floor(s.beachX/TILE),Math.floor(s.beachY/TILE),true);
   g.updateShips(.1);assert.equal(s.landed,false);assert.ok(b.hp<b.maxHp);assert.equal(g.enemies.length,0);b.hp=0;g.clean();g.updateShips(.1);assert.ok(s.landed);assert.ok(g.enemies.length);
 });
-test('dragons fly from the sea independently and ignore melee and archer-tower damage',()=>{
+test('dragons fly from the sea independently and ignore melee while ranged defenses can hit them',()=>{
   const g=new Game(8,'hard');g.wave=49;g.startWave();const dragon=g.enemies.find(e=>e.type==='dragon');assert.ok(dragon);assert.ok(g.ships.every(s=>!s.units.includes('dragon')));assert.ok(!g.world.walkable(g.world.at(dragon.x,dragon.y)));
   const melee=g.addUnit('knight',dragon.x,dragon.y),archer=g.addUnit('archer',dragon.x,dragon.y),tower=g.addBuilding('tower',40,40,true),ballista=g.addBuilding('ballista',40,43,true),before=dragon.hp;
-  g.hit(melee,dragon,.1);g.hit(tower,dragon,.1);assert.equal(dragon.hp,before);g.hit(archer,dragon,.1);assert.ok(dragon.hp<before);const hp=dragon.hp;g.hit(ballista,dragon,.1);assert.ok(dragon.hp<hp);Object.assign(melee,{x:g.keep.x,y:g.keep.y});Object.assign(archer,{x:g.keep.x,y:g.keep.y});const x=dragon.x,y=dragon.y;g.fight(.1);assert.ok(Math.hypot(dragon.x-x,dragon.y-y)>0);
+  g.hit(melee,dragon,.1);assert.equal(dragon.hp,before);g.hit(tower,dragon,.1);assert.ok(dragon.hp<before);g.hit(archer,dragon,.1);assert.ok(dragon.hp<before);const hp=dragon.hp;g.hit(ballista,dragon,.1);assert.ok(dragon.hp<hp);Object.assign(melee,{x:g.keep.x,y:g.keep.y});Object.assign(archer,{x:g.keep.x,y:g.keep.y});const x=dragon.x,y=dragon.y;g.fight(.1);assert.ok(Math.hypot(dragon.x-x,dragon.y-y)>0);
 });
 test('optional auto waves wait five seconds, respect pause and persist in saves',()=>{
   const g=new Game(4);g.wave=3;g.active=true;g.setAutoWave(true);g.update(.1);assert.equal(g.active,false);assert.ok(g.timer>=4.8&&g.timer<=5);g.paused=true;tick(g,10);assert.equal(g.wave,3);g.paused=false;tick(g,4.7);assert.equal(g.wave,3);tick(g,.5);assert.equal(g.wave,4);assert.equal(g.active,true);assert.equal(Game.restore(JSON.parse(JSON.stringify(g.serialize()))).autoWave,true);

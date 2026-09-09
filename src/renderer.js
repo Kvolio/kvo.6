@@ -165,6 +165,10 @@ export class Renderer {
     const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height,sx=w/(this.game.world.cols*TILE),sy=h/(this.game.world.rows*TILE);
     for(const t of this.game.world.tiles){c.fillStyle=({grass:'#71865a',sand:'#b9b187',water:'#345e60',mountain:'#b0b5a0',foothill:'#8e8a68'})[t.type];c.fillRect(t.x*TILE*sx,t.y*TILE*sy,TILE*sx+1,TILE*sy+1);if(t.resource==='gold'||t.resource==='iron'){c.fillStyle=t.resource==='gold'?'#ecd18a':'#a0c1ce';c.fillRect((t.x+.3)*TILE*sx,(t.y+.3)*TILE*sy,1.6,1.6);}}
     for(const b of this.game.buildings){c.fillStyle=b.type==='keep'?'#fff0bf':'#c5ac73';c.fillRect(b.tx*TILE*sx,b.ty*TILE*sy,BUILDINGS[b.type].size*TILE*sx,BUILDINGS[b.type].size*TILE*sy);}c.fillStyle='#f49770';for(const e of this.game.enemies)c.fillRect(e.x*sx,e.y*sy,2,2);
+    // Clamp fleets outside the world to an edge marker, pointing toward the beach.
+    for(const s of this.game.ships){if(s.landed)continue;const x=Math.max(5,Math.min(w-5,s.x*sx)),y=Math.max(5,Math.min(h-5,s.y*sy));
+      c.save();c.translate(x,y);c.rotate(Math.atan2((s.targetY-s.y)*sy,((s.targetX??s.x)-s.x)*sx));c.fillStyle='#fff0bd';c.strokeStyle='#873d2c';c.lineWidth=1.5;c.beginPath();c.moveTo(5,0);c.lineTo(-3,-3.5);c.lineTo(-1,0);c.lineTo(-3,3.5);c.closePath();c.fill();c.stroke();c.restore();
+    }
     for(const p of this.game.portals||[]){c.fillStyle='#ef92c4';c.fillRect(p.x*sx-2,p.y*sy-2,4,4);}
     c.strokeStyle='#f4dfad';c.lineWidth=1;c.strokeRect((this.camera.x-this.width/2/this.camera.zoom)*sx,(this.camera.y-this.height/2/this.camera.zoom)*sy,this.width/this.camera.zoom*sx,this.height/this.camera.zoom*sy);
   }

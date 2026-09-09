@@ -137,7 +137,6 @@ export class World {
     for(let y=ty;y<ty+d.size;y++)for(let x=tx;x<tx+d.size;x++){
       if(!this.buildable(this.tile(x,y)))return this.tile(x,y)?.type==='mountain'?'Peaks cannot be built on. Use the foothills.':'Buildings need dry land.';
       if(this.buildingAt(buildings,x,y))return 'Another building occupies this site.';
-      if(this.tile(x,y)?.resource&&this.tile(x,y).amount>0)return 'Clear the resources on this site before building.';
     }
     if(d.resource&&d.resource!=='food'){
       const proposed={id:-1,type,tx,ty,hp:1},layout=[...buildings,proposed];

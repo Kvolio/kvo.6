@@ -1,7 +1,20 @@
 export const TILE = 40, COLS = 64, ROWS = 48;
+// Difficulty tuning is shared by generation, combat and preparation timers.
+export const DIFFICULTIES={
+ easy:{peace:360,interval:180,supply:1.6,count:.55,hp:.6,damage:.65},
+ normal:{peace:300,interval:150,supply:1.35,count:.8,hp:.85,damage:.85},
+ hard:{peace:240,interval:110,supply:1.15,count:1.2,hp:1.25,damage:1.15},
+ nightmare:{peace:210,interval:100,supply:1.1,count:1.35,hp:1.45,damage:1.3}
+};
+export function difficultyValue(difficulty,key,wave=1){
+ const d=DIFFICULTIES[difficulty]||DIFFICULTIES.normal,value=d[key];
+ if(!['hard','nightmare'].includes(difficulty)||!['count','hp','damage'].includes(key))return value;
+ const opening={hard:{count:1.05,hp:1.08,damage:1.03},nightmare:{count:1.12,hp:1.18,damage:1.1}}[difficulty][key];
+ return opening+(value-opening)*Math.min(1,Math.max(0,(wave-1)/11));
+}
 export const RESOURCES = {wood:'♧',stone:'◆',food:'♨',iron:'⬡',gold:'◈'};
 export const BUILDINGS = {
- keep:{name:'Keep',icon:'♜',size:3,hp:2600,cost:{},time:0,desc:'The heart of your kingdom.',pop:8},
+ keep:{name:'Keep',icon:'♜',size:3,hp:2600,cost:{},time:0,range:260,damage:20,attackInterval:1.2,desc:'The heart of your kingdom. Automatically fires defensive arrows.',pop:8},
  lumber:{name:'Lumber Camp',icon:'⚒',size:2,hp:400,cost:{wood:60},time:10,category:'Economy',resource:'wood',desc:'Harvests nearby forests.',workers:4},
  farm:{name:'Farm',icon:'♧',size:2,hp:320,cost:{wood:70},time:10,category:'Economy',resource:'food',desc:'Food for a growing kingdom.',workers:4},
  quarry:{name:'Quarry',icon:'◆',size:2,hp:550,cost:{wood:75},time:12,category:'Economy',resource:'stone',desc:'Work near stone deposits.',workers:4},
@@ -82,8 +95,8 @@ export function nightmareComposition(wave){
 export function waveComposition(wave,difficulty='normal') {
  if(difficulty==='nightmare'&&wave>50&&wave<=60)return nightmareComposition(wave);
  const pool=wave<4?['raider']:wave<12?['raider','barbarian','bow','raider','bow']:wave<22?['barbarian','bow','berserker','ogre','bow','raider']:['elite','bow','berserker','ram','elite','ogre','bow','barbarian'];
- const factor=difficulty==='easy'?.8:difficulty==='hard'?1.2:difficulty==='nightmare'?1.35:1;
- const units=Array.from({length:Math.max(5,Math.round(Math.min(180,4+wave*2.5)*factor))},(_,i)=>pool[(i+wave)%pool.length]);
+ const factor=difficultyValue(difficulty,'count',wave);
+ const units=Array.from({length:Math.max(3,Math.round(Math.min(180,4+wave*2.5)*factor))},(_,i)=>pool[(i+wave)%pool.length]);
  if(BOSSES[wave])units.push(BOSSES[wave]);else if(wave>50&&wave%10===0)units.push('warlord');
  return units;
 }

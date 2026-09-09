@@ -9,7 +9,7 @@ try{
   for(const spec of [{name:'desktop',width:1440,height:900,touch:false},{name:'small-phone',width:320,height:568,touch:true},{name:'landscape',width:844,height:390,touch:true}]){
     const context=await browser.newContext({viewport:{width:spec.width,height:spec.height},hasTouch:spec.touch,isMobile:spec.touch});
     const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
-    await page.goto('http://127.0.0.1:4173/?test');await page.locator('#new-kingdom').click();await page.locator('#new-game').click();
+    await page.goto('http://127.0.0.1:4173/?test');await page.locator('#new-kingdom').click();await page.locator('#new-game').click();await page.locator('#tutorial-skip').click();
     await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.paused=true;g.keep.level=3;for(const r in g.resources)g.resources[r]=5000;for(const t of g.world.tiles)Object.assign(t,{type:'grass',resource:null,amount:0});g.revision++;a.renderer.terrain=null;a.renderer.camera={x:37*40,y:31*40,zoom:.8};a.input.begin('wall');a.ui.selection();a.ui.update();});
     const canvas=await page.locator('#game').boundingBox();
     const points=await page.evaluate(()=>[window.__tidehold.renderer.worldToScreen(35.5*40,29.5*40),window.__tidehold.renderer.worldToScreen(39.5*40,29.5*40)]);

@@ -58,9 +58,11 @@ Existing saves load their original maps unchanged and receive the new graphics a
 
 The title screen offers Continue, New Kingdom, Settings, and How to Play. Build and Army open trays from the bottom dock; selecting buildings, units, or deposits opens their inspector. Choosing a building closes the tray for placement. The pause menu saves before returning to the title and keeps the current kingdom open if saving fails. Nested menus preserve your previous pause state.
 
-See [Nightmare, upgrades and screenshots](docs/NIGHTMARE.md), [implementation coverage](docs/OVERHAUL-STATUS.md), and [playtest scope](docs/PLAYTEST.md).
+See [beginner guidance, difficulty tuning and boss HUD](docs/USABILITY.md), [Nightmare, upgrades and screenshots](docs/NIGHTMARE.md), [implementation coverage](docs/OVERHAUL-STATUS.md), and [playtest scope](docs/PLAYTEST.md).
 
 Buildings do not generate resources without workers. Workers gather, carry resources, and drop them at the Keep or a Warehouse. Food is consumed slowly by the population; at zero food, friendly movement slows. Pause remains available while planning and building.
+
+The Keep fires defensive arrows automatically. New kingdoms wait for a building, recruitment or unit order before counting down to the first invasion. Easy and Normal offer a skippable in-game tutorial. Approaching ships appear as cream arrows on the minimap. Buildings can replace deposits and move units safely out of their footprint.
 
 ## Implemented
 
@@ -78,7 +80,7 @@ Buildings do not generate resources without workers. Workers gather, carry resou
 
 The broad original brief is preserved in docs/DESIGN-BRIEF.md and the requested overhaul in docs/OVERHAUL-OBJECTIVE.md. This game uses original local Canvas and Web Audio artwork. Optional ideas from the original brief, such as additional troop classes, experience ranks, random events, cinematics, cloud saves and advertising, are not claimed as implemented.
 
-77 simulation tests, six organic openings, established boss encounters, offline audio renders and desktop/touch browser suites support this update. Browser emulation and CPU throttling do not certify physical iOS/Android hardware. Automated balance probes also do not replace long-term player feedback.
+85 simulation tests, eight organic openings, established boss encounters, offline audio renders and desktop/touch browser suites support this update. Browser emulation and CPU throttling do not certify physical iOS/Android hardware. Automated balance probes also do not replace long-term player feedback.
 
 ## Source layout
 
