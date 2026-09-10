@@ -68,7 +68,14 @@ export class Art {
     this.cache.set(key,canvas);return canvas;
   }
   alternateKeep(c,level,design){
-    if(design===1){
+    if(design===3){
+      this.polygon(c,[[21,2],[99,2],[118,21],[118,99],[99,118],[21,118],[2,99],[2,21]],'#292735','#bd8a62');
+      this.polygon(c,[[25,16],[95,16],[104,25],[104,95],[95,104],[25,104],[16,95],[16,25]],'#624148','#db9c66');
+      this.roof(c,37,20,46,54,'dark');this.roof(c,19,42,25,48,'dark');this.roof(c,76,42,25,48,'dark');
+      for(const [x,y]of [[12,12],[108,12],[12,108],[108,108]]){this.circle(c,x,y,12,'#171e29');this.polygon(c,[[x-9,y],[x,y-15],[x+9,y],[x,y+12]],'#4b3b50','#c8a06c');this.circle(c,x,y,3,'#ec8155');}
+      this.circle(c,60,88,12,'#222633');this.circle(c,60,88,8,'#bd5c50');this.circle(c,60,88,4,'#f6c483');
+      for(let i=0;i<level;i++){c.fillStyle='#edc881';c.fillRect(42+i*8,26,3,5);}if(level>=3)this.roof(c,43,6,34,24,'dark');if(level>=4)for(const x of [27,93])this.roof(c,x-7,74,14,32,'dark');
+    }else if(design===1){
       // The Highland hall is an open timber compound with a long cross-gabled roof.
       c.fillStyle='#7d8056';c.fillRect(3,3,114,114);this.fence(c,7,7,106,106);
       const palette=level>3?'dark':level>1?'terra':'straw';
@@ -98,7 +105,7 @@ export class Art {
   }
   building(type,level=1,connections=10,design=0){
     if(['road','wall','palisade'].includes(type))return this.infrastructure(type,level,connections);
-    const key=`${type}:${level}:${design}`;if(this.cache.has(key))return this.cache.get(key);
+    const key=`${type}:${level}:${design}:${connections}`;if(this.cache.has(key))return this.cache.get(key);
     const s=BUILDINGS[type].size*TILE,pad=12,canvas=document.createElement('canvas');canvas.width=(s+pad*2)*2;canvas.height=(s+pad*2)*2;
     const c=canvas.getContext('2d');c.scale(2,2);c.translate(pad,pad);
     const rng=random(type.split('').reduce((v,k)=>v+k.charCodeAt(0),0));
@@ -124,7 +131,12 @@ export class Art {
       if(type==='palisade'){c.fillStyle='#695037';c.fillRect(1,9,38,22);for(let x=3;x<40;x+=6){c.fillStyle='#b9a073';c.fillRect(x,8,4,24);this.circle(c,x+2,10,2,'#e4c89a');}}
       else{this.stone(c,0,9,40,22);for(let x=1;x<40;x+=8){c.fillStyle='#dbd5b7';c.fillRect(x,8,5,5);c.fillRect(x,27,5,5);}}
       if(type==='gate'){c.fillStyle='#5d513b';c.fillRect(14,0,12,40);c.strokeStyle='#d3b272';c.lineWidth=2;c.beginPath();c.moveTo(15,19);c.lineTo(25,19);c.moveTo(15,23);c.lineTo(25,23);c.stroke();}
+    }else if(type==='temple'){
+      this.stone(c,9,9,102,102);this.roof(c,43,13,34,90,'slate');this.roof(c,16,40,88,30,'slate','horizontal');
+      this.circle(c,60,55,20,'#b8c6b0');this.circle(c,60,55,16,'#467f7d');for(let i=0;i<8;i++){const a=i*Math.PI/4;this.polygon(c,[[60,55],[60+Math.cos(a)*16,55+Math.sin(a)*16],[60+Math.cos(a+.78)*16,55+Math.sin(a+.78)*16]],i<4?'#80b7a4':'#3a6f70','#a5c5ad');}this.circle(c,60,55,5,'#e6cf83');
+      for(const x of [25,95]){this.circle(c,x,92,8,'#a4b5a3');this.circle(c,x,92,5,'#5d9c97');}for(let i=1;i<level;i++)this.roof(c,9+(i-1)*25,14,19,20,'terra');
     }else if(type==='tower'||type==='ballista'){
+      for(const [dx,dy,bit]of [[0,-1,1],[1,0,2],[0,1,4],[-1,0,8]])if(connections&bit){c.strokeStyle='#bbb9a0';c.lineWidth=18;c.beginPath();c.moveTo(s/2,s/2);c.lineTo(s/2+dx*s/2,s/2+dy*s/2);c.stroke();}
       const n=type==='tower'?4:13;this.towerTop(c,n,n,s-n*2,false);
       c.save();c.translate(s/2,s/2);c.rotate(-.35);c.fillStyle='#b7a074';c.fillRect(-3,-s*.3,6,s*.6);c.strokeStyle='#d7c899';c.lineWidth=3;c.beginPath();c.arc(0,-4,s*.24,Math.PI*.9,Math.PI*2.1);c.stroke();c.strokeStyle='#c2c9b2';c.lineWidth=1;c.beginPath();c.moveTo(-s*.23,-5);c.lineTo(0,10);c.lineTo(s*.23,-5);c.stroke();c.restore();
     }else if(['quarry','ironmine','goldmine'].includes(type)){

@@ -2,7 +2,7 @@
 
 ## Kingdom controls
 
-- Construction can replace wood, stone, iron and gold deposits. Only deposits inside the footprint are removed; they do not grant free resources. Explicit worker clearing still recovers resources. Mines still need reachable deposits nearby.
+- Construction can replace wood, stone, iron and gold deposits. Only deposits inside the footprint are covered; cancel unfinished construction to restore their remaining resources. Completion permanently removes them, with no free resource payout. Explicit worker clearing still recovers resources. Mines still need reachable deposits nearby.
 - Units occupying a planned site move to free ground in their existing connected region before the footprint becomes solid. Invalid or unaffordable plans leave units and resources untouched. Mountains, water and existing buildings remain invalid sites.
 - The Keep automatically fires arrows within 260 world units, dealing 20 base damage every 1.2 seconds. Levels and defensive upgrades improve it. Like other ranged defenses, it can target flying enemies; melee still cannot target airborne enemies.
 - Cream directional arrows on the minimap show incoming fleets, including ships outside the map boundary. Markers disappear after landing.
@@ -35,7 +35,7 @@ Boss attacks execute automatically without attack-warning popups. Existing attac
 
 ## Verification
 
-85 simulation tests pass, including 100 fixed mountain seeds and 100 island seeds. Added coverage checks first-action and tutorial timers, save migration, difficulty progression, occupied resource placement, atomic failure, Keep arrows against ground/air targets, and automatic boss attacks without popups.
+105 simulation tests pass, including 100 fixed mountain seeds and 100 island seeds. Added coverage checks first-action and tutorial timers, save migration, difficulty progression, occupied resource placement, atomic failure, Keep arrows against ground/air targets, and automatic boss attacks without popups.
 
 The usability browser suite checks desktop 1440×900, tablet 768×1024, phone 390×844, small phone 320×568 and landscape 844×390, plus orientation changes. It verifies Keep previews, tutorial navigation and clipping, pause restoration, initial countdown, fleet marker pixels and all five boss tiers. Nightmare, construction, polish and offline release suites also pass.
 

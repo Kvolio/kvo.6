@@ -13,6 +13,12 @@ export function difficultyValue(difficulty,key,wave=1){
  return opening+(value-opening)*Math.min(1,Math.max(0,(wave-1)/11));
 }
 export const RESOURCES = {wood:'♧',stone:'◆',food:'♨',iron:'⬡',gold:'◈'};
+export const KEEP_PERKS=[
+ {name:'Coastal Keep',description:'+25% Keep damage · +20% Keep range',damage:1.25,range:1.2},
+ {name:'Highland Hall',description:'+500 storage per Keep level',storage:500},
+ {name:'Royal Citadel',description:'+25% gold gathered from mines',gold:1.25},
+ {name:'Demon Castle',description:'+20% Keep damage and range · +15% troop damage',damage:1.2,range:1.2,units:1.15}
+];
 export const BUILDINGS = {
  keep:{name:'Keep',icon:'♜',size:3,hp:2600,cost:{},time:0,range:260,damage:20,attackInterval:1.2,desc:'The heart of your kingdom. Automatically fires defensive arrows.',pop:8},
  lumber:{name:'Lumber Camp',icon:'⚒',size:2,hp:400,cost:{wood:60},time:10,category:'Economy',resource:'wood',desc:'Harvests nearby forests.',workers:4},
@@ -26,6 +32,7 @@ export const BUILDINGS = {
  barracks:{name:'Barracks',icon:'⚔',size:2,hp:850,cost:{wood:100,stone:40},time:16,category:'Military',desc:'Train militia and spearmen.'},
  range:{name:'Archery Range',icon:'➶',size:2,hp:650,cost:{wood:120,stone:30},time:16,category:'Military',desc:'Train ranged defenders.'},
  stable:{name:'Stable',icon:'♞',size:3,hp:950,cost:{wood:180,stone:80,gold:40},time:20,category:'Military',level:3,desc:'Train fast, armored knights.'},
+ temple:{name:'Temple',icon:'✦',size:3,hp:1100,cost:{wood:180,stone:140,gold:100},time:24,category:'Military',level:2,desc:'One per kingdom. Trains 2 Clerics per level and slowly heals nearby troops.'},
  smith:{name:'Blacksmith',icon:'⚒',size:2,hp:800,cost:{wood:130,stone:100},time:18,category:'Military',level:2,desc:'Research weapons and armor.'},
  palisade:{name:'Palisade',icon:'▥',size:1,hp:500,cost:{wood:12},time:3,category:'Defense',desc:'A sturdy wooden defense.'},
  wall:{name:'Stone Wall',icon:'▦',size:1,hp:1400,cost:{stone:25},time:5,category:'Defense',level:2,desc:'Resists heavy assaults.'},
@@ -39,7 +46,10 @@ export const UNITS = {
  spear:{name:'Spearman',icon:'⚔',hp:150,damage:22,range:43,speed:65,armor:4,cost:{food:40,wood:20,iron:10},building:'barracks',level:2},
  archer:{name:'Archer',icon:'➶',hp:70,damage:15,range:220,speed:70,armor:0,cost:{food:30,wood:30,gold:10},building:'range'},
  crossbow:{name:'Crossbowman',icon:'➶',hp:100,damage:32,range:245,speed:65,armor:3,cost:{food:45,iron:20,gold:15},building:'range',level:3},
- knight:{name:'Knight',icon:'♞',hp:260,damage:35,range:38,speed:110,armor:8,cost:{food:70,iron:30,gold:35},building:'stable',level:3}
+ knight:{name:'Knight',icon:'⚔',hp:240,damage:32,range:38,speed:62,armor:9,cost:{food:55,iron:25,gold:25},building:'barracks',level:3},
+ mountedknight:{name:'Mounted Knight',icon:'♞',hp:300,damage:38,range:42,speed:110,armor:8,cost:{food:75,iron:35,gold:40},building:'stable',requiresBuildings:['barracks'],level:3,mounted:true,scale:1.3},
+ mountedarcher:{name:'Mounted Archer',icon:'➶',hp:130,damage:19,range:225,speed:112,armor:3,cost:{food:55,wood:40,gold:30},building:'stable',requiresBuildings:['range'],level:3,mounted:true,scale:1.3},
+ cleric:{name:'Cleric',icon:'✦',hp:115,damage:0,range:210,speed:65,armor:2,cost:{food:60,gold:65},building:'temple',level:2,healer:true}
 };
 export const ENEMIES = {
  raider:{name:'Raider',hp:65,damage:8,range:28,speed:40,armor:0},
@@ -61,6 +71,8 @@ export const ENEMIES = {
  dragon:{name:'Black Dragon · Phase I',hp:6500,damage:70,range:190,speed:32,armor:10,boss:true,flying:true,ability:'fire'},
  conqueror:{name:'The Conqueror · Phase II',hp:5000,damage:65,range:50,speed:48,armor:14,boss:true,ability:'rally'}
 };
+ENEMIES.dragonrider={name:'Ashwing Rider',hp:850,damage:29,range:200,speed:60,armor:5,flying:true,scale:1.7};
+ENEMIES.elderdragonrider={name:'Storm Drake Rider',hp:1600,damage:45,range:220,speed:52,armor:8,flying:true,scale:2,ability:'fire',abilityInterval:13};
 export const BOSSES = {5:'captain',10:'chief',15:'brute',20:'champion',25:'giant',30:'titan',35:'blackknight',40:'warlord',45:'dragonknight',50:'dragon'};
 // Threat comes from complementary roles, area attacks and armor as well as HP.
 for(const d of Object.values(ENEMIES)){
@@ -97,6 +109,7 @@ export function waveComposition(wave,difficulty='normal') {
  const pool=wave<4?['raider']:wave<12?['raider','barbarian','bow','raider','bow']:wave<22?['barbarian','bow','berserker','ogre','bow','raider']:['elite','bow','berserker','ram','elite','ogre','bow','barbarian'];
  const factor=difficultyValue(difficulty,'count',wave);
  const units=Array.from({length:Math.max(3,Math.round(Math.min(180,4+wave*2.5)*factor))},(_,i)=>pool[(i+wave)%pool.length]);
+ if(wave>=16&&wave%3===1)units.push('dragonrider');if(wave>=32&&wave%4===0)units.push('elderdragonrider');
  if(BOSSES[wave])units.push(BOSSES[wave]);else if(wave>50&&wave%10===0)units.push('warlord');
  return units;
 }

@@ -1,7 +1,7 @@
 // Added wings, machinery and fortifications communicate completed upgrades at
 // map scale. This shares the same cached Canvas drawing path as menu portraits.
 export function paintBuildingUpgrades(a,c,type,level,s,design){
-  if(level<2)return;
+  if(level<2||type==='temple'||type==='keep'&&design===3)return;
   const roof=(x,y,w,h,color='slate',axis='vertical')=>a.roof(c,x,y,w,h,color,axis);
   const stone=(x,y,w,h)=>a.stone(c,x,y,w,h);
   const line=(x,y,xx,yy,color='#aa956c',width=2)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};

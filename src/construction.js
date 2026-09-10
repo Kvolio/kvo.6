@@ -16,9 +16,9 @@ export function constructionLine(from,to){
 
 export const Construction = {
   connectionMask(b,layout=this.buildings){
-    const family=b.type==='road'?['road']:['wall','palisade','gate'];
+    const family=b.type==='road'?['road']:['wall','palisade','gate','tower','ballista'];
     let mask=0;for(const [dx,dy,bit]of [[0,-1,1],[1,0,2],[0,1,4],[-1,0,8]]){
-      const neighbor=this.world.buildingAt(layout,b.tx+dx,b.ty+dy);if(neighbor&&family.includes(neighbor.type))mask|=bit;
+      const size=BUILDINGS[b.type].size;for(let i=0;i<size;i++){const x=dx<0?b.tx-1:dx>0?b.tx+size:b.tx+i,y=dy<0?b.ty-1:dy>0?b.ty+size:b.ty+i;const neighbor=this.world.buildingAt(layout,x,y);if(neighbor&&family.includes(neighbor.type))mask|=bit;}
     }
     return mask||((b.rotation||0)%2?5:10);
   },
@@ -27,6 +27,7 @@ export const Construction = {
     const fail=reason=>({reason,cost,sites});
     if(this.over||!d||type==='keep')return fail('This building cannot be placed.');
     if((d.level||1)>this.level)return fail(`Requires Keep level ${d.level}.`);
+    if(type==='temple'&&(this.buildings.some(b=>b.type==='temple'&&b.hp>0)||cells?.length>1))return fail('Only one Temple may stand in a kingdom.');
     if(!Array.isArray(cells)||!cells.length||cells.length>256)return fail('Choose a shorter building line.');
     const seen=new Set();
     for(const cell of cells){
@@ -55,8 +56,8 @@ export const Construction = {
     if(plan.reason){this.notice(plan.reason);return false;}
     this.spend(plan.cost);this.noteAction();
     for(const {u,point} of plan.evacuations){Object.assign(u,point);u.path=[];u.pathRevision=-1;}
-    for(const site of plan.sites)for(let y=site.ty;y<site.ty+BUILDINGS[type].size;y++)for(let x=site.tx;x<site.tx+BUILDINGS[type].size;x++)Object.assign(this.world.tile(x,y),{resource:null,amount:0,clearing:false});
-    const result=plan.sites.map(site=>{const b=this.addBuilding(type,site.tx,site.ty);b.rotation=site.rotation;return b;});
+    for(const site of plan.sites){site.coveredResources=[];for(let y=site.ty;y<site.ty+BUILDINGS[type].size;y++)for(let x=site.tx;x<site.tx+BUILDINGS[type].size;x++){const t=this.world.tile(x,y);if(t.resource)site.coveredResources.push({x,y,resource:t.resource,amount:t.amount});Object.assign(t,{resource:null,amount:0,clearing:false});}}
+    const result=plan.sites.map(site=>{const b=this.addBuilding(type,site.tx,site.ty);b.rotation=site.rotation;b.coveredResources=site.coveredResources;return b;});
     this.stats.built+=result.length;this.scheduleConstruction();this.sound('build');
     this.notice(`${result.length>1?result.length+' sections':BUILDINGS[type].name} queued. Workers will build automatically.`);
     return result;
@@ -79,8 +80,8 @@ export const Construction = {
     b.upgrade=null;for(const u of this.units)if(u.job?.building===b.id&&u.job.kind==='upgrade')this.finishConstructionJob(u);
     return true;
   },
-  towerRange(b){return (BUILDINGS[b.type].range||0)*(1+.15*(b.rangeLevel||0)+this.researchBonus('range'));},
-  towerDamage(b){return (BUILDINGS[b.type].damage||0)*b.level*(1+.2*(b.damageLevel||0))*(1+this.tech*.15)*(1+this.researchBonus('tower'));},
+  towerRange(b){return (BUILDINGS[b.type].range||0)*(b.type==='keep'?(this.keepPerk.range||1):1)*(1+.15*(b.rangeLevel||0)+this.researchBonus('range'));},
+  towerDamage(b){return (BUILDINGS[b.type].damage||0)*(b.type==='keep'?(this.keepPerk.damage||1):1)*b.level*(1+.2*(b.damageLevel||0))*(1+this.tech*.15)*(1+this.researchBonus('tower'));},
   clearResource(tileId){
     const tile=this.world.tiles[tileId];if(!tile?.resource||tile.amount<=0)return false;
     if(tile.resource==='iron'||tile.resource==='gold')if(this.level<2){this.notice('Upgrade the Keep to level 2 to extract this mineral.');return false;}
@@ -147,7 +148,7 @@ export const Construction = {
       b.upgrade=null;this.notice(`${BUILDINGS[b.type].name} upgrade completed.`);
     }else{
       b.progress+=dt;if(b.progress<BUILDINGS[b.type].time)return true;
-      b.complete=true;this.notice(`${BUILDINGS[b.type].name} completed.`);
+      b.complete=true;delete b.coveredResources;this.revision++;if(this.researched.includes('masonry'))this.raiseBuildingLevel(b,2);this.notice(`${BUILDINGS[b.type].name} completed.`);
     }
     this.sound('build');
     for(const w of this.units.filter(w=>w.job?.building===b.id&&['build','upgrade'].includes(w.job.kind))){

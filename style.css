@@ -72,3 +72,7 @@ dialog{color:var(--ink);background:linear-gradient(145deg,#2c4234,#1a3028);borde
 @media(prefers-reduced-motion:reduce){.boss-fill,.boss-trail{transition:none}}
 /* Keep tutorial navigation visible while long lessons scroll on short screens. */
 #tutorial{display:flex;flex-direction:column;overflow:hidden}#tutorial>.eyebrow,#tutorial>strong,#tutorial>div{flex-shrink:0}#tutorial p{min-height:0;overflow:auto;flex-shrink:1}
+.keep-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.keep-choices small{display:block;font-size:11px;line-height:1.4;margin-top:5px;color:#d5c59e}.keep-choices button:disabled{filter:grayscale(.8)}
+
+@media(max-width:700px){.keep-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.keep-choices img{height:58px}}
+@media(max-width:700px),(max-height:520px){.tech-tree{display:block;overflow-x:visible}.tech-branch{min-width:0}.tech-branch+ .tech-branch{margin-top:20px}}

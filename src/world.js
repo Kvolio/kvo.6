@@ -164,18 +164,20 @@ export class World {
     // always fails and needlessly selects the wall-breaking fallback.
     const targetBuilding=enemy?this.buildingAt(buildings,goalTile.x,goalTile.y):null,targetCells=new Set();
     if(targetBuilding){const n=BUILDINGS[targetBuilding.type].size;for(let y=targetBuilding.ty;y<targetBuilding.ty+n;y++)for(let x=targetBuilding.tx;x<targetBuilding.tx+n;x++)targetCells.add(y*this.cols+x);}
+    const roads=new Set(buildings.filter(b=>b.hp>0&&b.complete&&b.type==='road').map(b=>b.ty*this.cols+b.tx));
     const search=breakWalls=>{
-      const prev=new Int32Array(this.cols*this.rows).fill(-1),queue=[start];prev[start]=start;let found=-1;
-      for(let head=0;head<queue.length;head++){
-        const id=queue[head];if(id===goal){found=id;break;}
+      const prev=new Int32Array(this.cols*this.rows).fill(-1),cost=new Float64Array(this.cols*this.rows).fill(Infinity),heap=[];
+      const estimate=id=>(Math.abs(id%this.cols-goal%this.cols)+Math.abs(Math.floor(id/this.cols)-Math.floor(goal/this.cols)))/1.3;
+      const push=item=>{let i=heap.length;heap.push(item);while(i>0){const parent=(i-1)>>1;if(heap[parent].score<=item.score)break;heap[i]=heap[parent];i=parent;}heap[i]=item;};
+      const pop=()=>{const first=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1].score<heap[child].score)child++;if(heap[child].score>=last.score)break;heap[i]=heap[child];i=child;}heap[i]=last;}return first;};
+      cost[start]=0;prev[start]=start;push({id:start,cost:0,score:estimate(start)});let found=-1;
+      while(heap.length){const entry=pop(),id=entry.id;if(entry.cost!==cost[id])continue;if(id===goal){found=id;break;}
         for(const next of this.neighbors(id)){
-          if(prev[next]!==-1||!this.walkable(this.tiles[next])||(!breakWalls&&blocked.has(next)&&!targetCells.has(next)))continue;
-          prev[next]=id;queue.push(next);
+          if(!this.walkable(this.tiles[next])||(!breakWalls&&blocked.has(next)&&!targetCells.has(next)))continue;
+          const candidate=cost[id]+(roads.has(id)?1/1.3:1);if(candidate>=cost[next])continue;cost[next]=candidate;prev[next]=id;push({id:next,cost:candidate,score:candidate+estimate(next)});
         }
       }
-      if(found<0)return null;const result=[];
-      for(let id=found;id!==start;id=prev[id])result.push({x:(id%this.cols+.5)*TILE,y:(Math.floor(id/this.cols)+.5)*TILE});
-      return result.reverse();
+      if(found<0)return null;const result=[];for(let id=found;id!==start;id=prev[id])result.push({x:(id%this.cols+.5)*TILE,y:(Math.floor(id/this.cols)+.5)*TILE});return result.reverse();
     };
     const result=search(false)||(enemy?search(true):null)||[];
     if(revision!=null){if(this.routeCache.size>=2048)this.routeCache.delete(this.routeCache.keys().next().value);this.routeCache.set(routeKey,result.map(p=>({...p})));}

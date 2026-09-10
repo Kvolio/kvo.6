@@ -33,7 +33,7 @@ export const Invasions={
   },
   canDamage(source,target){
     if(target.garrison&&ENEMIES[source.type]&&!this.isAirborne(source)&&ENEMIES[source.type].range<=85)return false;
-    if(this.isAirborne(target)){const ranged=UNITS[source.type]||ENEMIES[source.type];return (BUILDINGS[source.type]?.range||0)>85||!!ranged&&ranged.range>85;}
+    if(this.isAirborne(target)){const ranged=UNITS[source.type]||ENEMIES[source.type];return (BUILDINGS[source.type]?.range||0)>85||!!ranged&&!ranged.healer&&ranged.range>85;}
     return true;
   },
   updateShips(dt){

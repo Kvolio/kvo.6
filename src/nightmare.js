@@ -2,7 +2,7 @@ import {ENEMIES,TILE,nightmareComposition,DIFFICULTIES,difficultyValue} from './
 import {random,distance} from './world.js';
 
 export const Nightmare={
-  campaignLength(){return this.difficulty==='nightmare'?60:50;},
+  campaignLength(){return this.difficulty==='nightmare'?60:this.difficulty==='easy'?40:50;},
   breakSeal(){
     if(this.difficulty!=='nightmare'||this.sealBroken)return;
     this.sealBroken=true;this.sealTime=this.time;this.notice('The Conqueror falls. The seal breaks. Ten demon invasions remain.');this.sound('seal');

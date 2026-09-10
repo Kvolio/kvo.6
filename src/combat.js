@@ -21,12 +21,12 @@ export const Combat={
     const d=ENEMIES[source.type]||UNITS[source.type]||BUILDINGS[source.type];
     if(BUILDINGS[source.type]?.damage)return this.towerDamage(source);
     if(ENEMIES[source.type])return d.damage*difficultyValue(this.difficulty,'damage',this.wave)*(1+(source.auraBonus||0)+(source.rallyUntil>this.time?.2:0))*(source.phase===2?1.15:1);
-    return d.damage*(1+this.tech*.15)*(1+this.researchBonus(d.range>85?'ranged':'melee'));
+    return d.damage*(this.keepPerk.units||1)*(1+(source.clericBuff||0))*(1+this.tech*.15)*(1+this.researchBonus(d.range>85?'ranged':'melee'));
   },
   damageEntity(source,target,raw,{area=false,burn=false}={}){
     if(target.hp<=0||this.isAirborne(target)&&!this.canDamage(source,target)||!area&&!this.canDamage(source,target))return 0;
-    const d=ENEMIES[target.type]||UNITS[target.type]||BUILDINGS[target.type],armor=burn?0:(d.armor||0)+(UNITS[target.type]?this.tech+this.researchBonus('armor'):0);
-    let damage=Math.max(burn?0:1,raw-armor)*(1-(d.defense||0));
+    const d=ENEMIES[target.type]||UNITS[target.type]||BUILDINGS[target.type],armor=burn?0:(d.armor||0)+(UNITS[target.type]?this.tech+this.researchBonus('armor')+(target.clericArmor||0):0);
+    let damage=Math.max(burn?0:1,raw-armor)*(1-(d.defense||0));if(target.garrison&&this.buildings.some(b=>b.id===target.garrison&&b.complete&&b.hp>0))damage*=.45;
     if(target.wardUntil>this.time&&this.enemies.some(e=>e.hp>0&&e.wardFor===target.id))damage*=.35;
     if(target.phase==='healing')damage*=.1;
     target.hp-=damage;target.lastAttacker=source.id;target.lastHitTime=this.time;
@@ -100,7 +100,7 @@ export const Combat={
     this.updateCombatStatus(dt);this.enemyGrid=new CombatGrid(this.enemies);this.playerGrid=new CombatGrid(this.units);
     for(const b of this.buildings){if(!b.complete||b.hp<=0||!BUILDINGS[b.type].damage)continue;const e=this.friendlyTarget(b,this.towerRange(b));if(e)this.hit(b,e,dt);}
     for(const u of this.units){
-      if(u.hp<=0||u.type==='worker')continue;if(this.updateGarrison(u,dt))continue;
+      if(u.hp<=0||u.type==='worker')continue;if(UNITS[u.type].healer){if(u.target&&this.move(u,u.target,dt))u.target=null;continue;}if(this.updateGarrison(u,dt))continue;
       const range=this.unitRange(u),target=this.friendlyTarget(u,range+(u.stance==='hold'?0:140));
       if(u.target&&u.stance==='move'){if(this.move(u,u.target,dt)){u.target=null;u.stance='defend';}continue;}
       if(target&&distance(u,target)<=range)this.hit(u,target,dt);

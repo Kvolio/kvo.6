@@ -44,7 +44,7 @@ try{
     await page.locator('[data-action="clear"]').click();assert.equal(await page.evaluate(()=>window.__tidehold.game.world.tiles[32*64+42].clearing),true);
     await page.evaluate(()=>{const a=window.__tidehold,g=a.game;g.addBuilding('smith',45,30,true);a.ui.openTab('army');a.ui.update();});
     await page.locator('[data-action="research"]').click();
-    assert.equal(await page.locator('.tech-card').count(),9);
+    assert.equal(await page.locator('.tech-card').count(),11);
     assert.match(await page.locator('[data-research="siegecraft"]').innerText(),/Rangefinding/);
     await page.locator('[data-research="steel"]').click();
     assert.equal(await page.evaluate(()=>window.__tidehold.game.researchTask.id),'steel');

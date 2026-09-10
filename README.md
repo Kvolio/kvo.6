@@ -2,7 +2,7 @@
 
 A dependency-free HTML5 kingdom survival game for **desktop and touch screens**, built for [Kvolio/kvo.6](https://github.com/Kvolio/kvo.6). Features illustrated overhead roofs, a map-first HUD, ore-rich mountains, larger islands, timed progression, and a 60-wave Nightmare campaign.
 
-Start with one Keep, five workers, and a small resource reserve. Build an economy, recruit defenders, fortify your coast, and survive 50 waves, or 60 on Nightmare. The project is a playable first implementation of the design brief, not a finished commercial release.
+Start with one Keep, five workers, and a small resource reserve. Build an economy, recruit defenders, fortify your coast, and survive 40 waves on Easy, 50 on Normal and Hard, or 60 on Nightmare. The project is a playable first implementation of the design brief, not a finished commercial release.
 
 ## Play locally
 
@@ -58,7 +58,7 @@ Existing saves load their original maps unchanged and receive the new graphics a
 
 The title screen offers Continue, New Kingdom, Settings, and How to Play. Build and Army open trays from the bottom dock; selecting buildings, units, or deposits opens their inspector. Choosing a building closes the tray for placement. The pause menu saves before returning to the title and keeps the current kingdom open if saving fails. Nested menus preserve your previous pause state.
 
-See [beginner guidance, difficulty tuning and boss HUD](docs/USABILITY.md), [Nightmare, upgrades and screenshots](docs/NIGHTMARE.md), [implementation coverage](docs/OVERHAUL-STATUS.md), and [playtest scope](docs/PLAYTEST.md).
+See [walls, troop classes, Temple and Keep perks](docs/EXPANSION.md), [beginner guidance, difficulty tuning and boss HUD](docs/USABILITY.md), [Nightmare, upgrades and screenshots](docs/NIGHTMARE.md), [implementation coverage](docs/OVERHAUL-STATUS.md), and [playtest scope](docs/PLAYTEST.md).
 
 Buildings do not generate resources without workers. Workers gather, carry resources, and drop them at the Keep or a Warehouse. Food is consumed slowly by the population; at zero food, friendly movement slows. Pause remains available while planning and building.
 
@@ -68,19 +68,20 @@ The Keep fires defensive arrows automatically. New kingdoms wait for a building,
 
 - Seeded coastal terrain and resource deposits; no starting village.
 - Grid placement, validity previews, construction, worker assignment, capacity, food upkeep, storage, repair, demolition refunds, and upgrades.
-- Six recruitable unit types, selection/group orders, hold/defend/attack move/patrol, gates, roads, towers, and grid pathfinding.
+- Nine recruitable unit types, selection/group orders, hold/defend/attack move/patrol, gates, roads, towers, and grid pathfinding.
 - Visible ship crews, multiple coasts, mixed enemy roles, stronger bosses, direct flying arrivals, wall garrisons, and optional five-second auto waves.
-- 50-wave core campaign; Nightmare adds demon portals, 12 regular demon classes, the ArchDemon, the two-phase Demon Lord and extra abilities at every earlier milestone. Endless continuation repeats demon bosses.
-- Worker-built timed upgrades, persistent/drag construction, timed training and a three-branch technology tree. Five illustrated building levels and three named Keep designs.
+- 40-wave Easy campaign and 50-wave Normal/Hard campaigns; Nightmare adds demon portals, 12 regular demon classes, the ArchDemon, the two-phase Demon Lord and extra abilities at every earlier milestone. Endless continuation repeats demon bosses.
+- Worker-built timed upgrades, persistent/drag construction, timed training and Blacksmith and Temple technology trees. Five illustrated building levels and four named Keep designs with distinct perks.
 - Easy/Normal/Hard/Nightmare, pause and 2× speed, original procedural music, atmosphere and combat effects, three audio sliders, local saves and autosaves. Audio starts after interaction and can be muted in Settings.
 - Responsive touch controls, capped rendering resolution, visible-region rendering, a minimap, and one-file packaging.
+- Connected wall/tower travel and cover, time-aware road routing, group-order fixes, cancelable resource coverage, Cleric healing and buffs, and a persistent Nightmare Keep reward.
 - Provider-neutral platform interface. Ad/cloud/score adapters report unavailable until an actual platform integration is supplied.
 
 ## Scope
 
 The broad original brief is preserved in docs/DESIGN-BRIEF.md and the requested overhaul in docs/OVERHAUL-OBJECTIVE.md. This game uses original local Canvas and Web Audio artwork. Optional ideas from the original brief, such as additional troop classes, experience ranks, random events, cinematics, cloud saves and advertising, are not claimed as implemented.
 
-85 simulation tests, eight organic openings, established boss encounters, offline audio renders and desktop/touch browser suites support this update. Browser emulation and CPU throttling do not certify physical iOS/Android hardware. Automated balance probes also do not replace long-term player feedback.
+105 simulation tests, eight organic openings, established boss encounters, offline audio renders and desktop/touch browser suites support this update. Browser emulation and CPU throttling do not certify physical iOS/Android hardware. Automated balance probes also do not replace long-term player feedback.
 
 ## Source layout
 
