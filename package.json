@@ -1,5 +1,15 @@
 {
-  "name": "tidehold", "version": "0.1.0", "private": true, "type": "module",
-  "scripts": {"start": "node tools/serve.mjs", "test": "node --test tests/*.test.mjs", "build": "node tools/build.mjs"},
-  "engines": {"node": ">=20"}
+  "name": "tidehold",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "build:crazygames": "node tools/build.mjs --crazygames && node tools/package-crazygames.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

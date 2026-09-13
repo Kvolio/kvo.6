@@ -16,3 +16,9 @@ jobs:
         with:
           name: tidehold-html5
           path: dist/index.html
+
+      - run: npm run build:crazygames
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tidehold-crazygames
+          path: dist/tidehold-crazygames.zip

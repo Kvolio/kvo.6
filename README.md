@@ -103,3 +103,7 @@ The broad original brief is preserved in docs/DESIGN-BRIEF.md and the requested 
 - `tools/design-test.mjs`: menu state, save failures, deposit inspection, orientation checks and deterministic visual fixtures.
 
 To run browser tests, provide `PLAYWRIGHT_PATH` (installed Playwright package path) and `CHROME_PATH` (Chrome executable path), start the local server, then run `node tools/browser-test.mjs`. The script's defaults match the development workstation. Test hooks are available only on localhost with `?test`; they are absent on public hosts.
+
+## CrazyGames upload
+
+Run `npm run build:crazygames` for the dedicated SDK v3 upload ZIP at `dist/tidehold-crazygames.zip`. Kingdoms, unlocks, tutorial progress and settings use the CrazyGames Data module. Gameplay events and platform audio muting are integrated. Standard offline/GitHub Pages builds remain independent. See [the submission guide](docs/CRAZYGAMES.md) for portal settings, cover/video generation and final account-sync QA.

@@ -8,7 +8,7 @@ export class AudioManager {
   restore(storage){try{const preference=storage.getItem('tidehold.sound');this.enabled=preference==null||preference==='true';const levels=JSON.parse(storage.getItem('tidehold.audio')||'{}');for(const key in this.levels)if(Number.isFinite(levels[key]))this.levels[key]=Math.max(0,Math.min(1,levels[key]));}catch{}}
   save(storage){storage.setItem('tidehold.sound',String(this.enabled));storage.setItem('tidehold.audio',JSON.stringify(this.levels));}
   unlock(){
-    if(!this.enabled)return false;
+    if(!this.enabled||this.platformMuted)return false;
     try{if(!this.context){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return false;this.context=new Audio();}
       if(!this.master){const c=this.context;this.master=c.createGain();this.master.gain.value=.65;
         const limiter=c.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=10;limiter.ratio.value=12;limiter.attack.value=.003;limiter.release.value=.18;this.master.connect(limiter);limiter.connect(c.destination);
@@ -19,9 +19,10 @@ export class AudioManager {
       return true;
     }catch{return false;}
   }
+  setPlatformMuted(value){this.platformMuted=!!value;this.applyLevels();}
   setEnabled(value){this.enabled=!!value;if(value)this.unlock();this.applyLevels();}
   setLevel(key,value){if(key in this.levels)this.levels[key]=Math.max(0,Math.min(1,Number(value)||0));this.applyLevels();}
-  applyLevels(quiet=false,hidden=false){if(!this.master)return;const now=this.context.currentTime;this.master.gain.setTargetAtTime(this.enabled&&!hidden?.65:0,now,.08);for(const key in this.levels)this.buses[key].gain.setTargetAtTime(this.levels[key]*(quiet&&key==='music'?.35:1),now,.15);}
+  applyLevels(quiet=false,hidden=false){if(!this.master)return;const now=this.context.currentTime;this.master.gain.setTargetAtTime(this.enabled&&!hidden&&!this.platformMuted?.65:0,now,.08);for(const key in this.levels)this.buses[key].gain.setTargetAtTime(this.levels[key]*(quiet&&key==='music'?.35:1),now,.15);}
   voice({frequency=220,end=frequency,duration=.3,volume=.1,type='triangle',at=this.context.currentTime,bus='effects',noise=false,filter=1200,attack=.008}){
     if(this.voices.size>=64)return;
     const c=this.context,source=noise?c.createBufferSource():c.createOscillator(),gain=c.createGain(),tone=c.createBiquadFilter();

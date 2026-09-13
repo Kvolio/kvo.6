@@ -76,3 +76,4 @@ dialog{color:var(--ink);background:linear-gradient(145deg,#2c4234,#1a3028);borde
 
 @media(max-width:700px){.keep-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.keep-choices img{height:58px}}
 @media(max-width:700px),(max-height:520px){.tech-tree{display:block;overflow-x:visible}.tech-branch{min-width:0}.tech-branch+ .tech-branch{margin-top:20px}}
+#startup{position:fixed;inset:0;z-index:1000;background:#1e302a;color:#eddbaf;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}#startup p{max-width:420px}#startup button{min-width:120px;min-height:48px}
